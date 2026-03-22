@@ -1,63 +1,65 @@
 import os
 import matplotlib.pyplot as plt
 
-# Путь до папки part_1, где лежат small_tests, big_tests и т.д.
-base_dir = "tests_results/part_1"
+# Теперь указываем корневую папку, откуда начинаем поиск
+base_dir = "tests_results"
 
-# Словарик с твоими шагами из C-кода, чтобы ось X была правильной
-# Если папки тут нет, по оси X будет просто номер замера
+# Словарик с твоими шагами из C-кода
 steps = {
     "small_tests": 50,
     "big_tests": 10000,
     "test_most_dublicates": 10000
 }
 
-# Проходим по всем элементам в base_dir
-for folder_name in os.listdir(base_dir):
-    folder_path = os.path.join(base_dir, folder_name)
+# os.walk рекурсивно проходит по всем папкам внутри base_dir
+for root, dirs, files in os.walk(base_dir):
+    
+    # Отфильтровываем файлы: нам нужны только файлы с тестами.
+    # Игнорируем картинки (png), скрытые файлы и системный мусор.
+    data_files = [f for f in files if not f.endswith('.png') and not f.startswith('.')]
 
-    # Работаем только с папками
-    if os.path.isdir(folder_path):
-        plt.figure(figsize=(10, 6)) # Создаем новый график
+    # Если в текущей папке есть файлы с данными, значит это папка с тестами
+    if data_files:
+        folder_name = os.path.basename(root) # Имя папки с тестами (например, big_tests)
+        parent_dir = os.path.dirname(root)   # Родительская папка (например, part_4)
+        
+        plt.figure(figsize=(10, 6))
         has_data = False
         
         # Узнаем шаг для текущей папки, по умолчанию 1
         current_step = steps.get(folder_name, 1)
 
-        # Читаем все файлы внутри папки (buble_sort, insertion_sort...)
-        for file_name in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, file_name)
+        # Читаем все файлы с тестами внутри этой папки
+        for file_name in data_files:
+            file_path = os.path.join(root, file_name)
+            times = []
+            
+            with open(file_path, 'r') as f:
+                for line in f:
+                    try:
+                        times.append(float(line.strip()))
+                    except ValueError:
+                        pass # Скипаем мусор
+            
+            if times:
+                x_axis = [i * current_step for i in range(len(times))]
+                plt.plot(x_axis, times, label=file_name, marker='.', markersize=5, linewidth=2)
+                has_data = True
 
-            if os.path.isfile(file_path):
-                times = []
-                with open(file_path, 'r') as f:
-                    for line in f:
-                        try:
-                            # Читаем числа, игнорируя пустые строки
-                            times.append(float(line.strip()))
-                        except ValueError:
-                            pass # Если попадется мусор, скипаем
-                
-                if times:
-                    # Генерируем ось X (размер массива)
-                    x_axis = [i * current_step for i in range(len(times))]
-                    
-                    # Рисуем линию для текущей сортировки
-                    plt.plot(x_axis, times, label=file_name, marker='.', markersize=5, linewidth=2)
-                    has_data = True
-
-        # Если в папке были данные, оформляем и сохраняем график
+        # Если данные успешно считались, рисуем и сохраняем
         if has_data:
             plt.title(f"Сравнение сортировок: {folder_name}", fontsize=14, fontweight='bold')
             plt.xlabel("Количество элементов (N)", fontsize=12)
             plt.ylabel("Время выполнения (секунды)", fontsize=12)
             
-            plt.legend() # Добавляем плашку с названиями сортировок
-            plt.grid(True, linestyle='--', alpha=0.7) # Кайфовая сеточка
+            plt.legend()
+            plt.grid(True, linestyle='--', alpha=0.7)
 
-            # Сохраняем картинку прямо в part_1
-            save_path = os.path.join(base_dir, f"{folder_name}_graph.png")
+            # Формируем путь для сохранения: родительская папка + имя_папки_graph.png
+            save_name = f"{folder_name}_graph.png"
+            save_path = os.path.join(parent_dir, save_name)
+            
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
             print(f"График сохранен: {save_path} kek")
 
-        plt.close() # Очищаем холст для следующей папки
+        plt.close() # Очищаем холст, чтобы графики не накладывались друг на друга

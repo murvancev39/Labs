@@ -1,21 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-void merge (unsigned *arr, unsigned *buffer, size_t left, size_t mid, size_t right);
-void merge_sort_recursive_internal (unsigned *arr, unsigned *buffer, size_t left, size_t right);
-void merge_sort_recursive_internal (unsigned *arr, unsigned *buffer, size_t left, size_t right);
-void merge_sort_iterative (unsigned *arr, size_t n);
-
-
-int main ()
-{
-    unsigned arr [10] = {1,2,3,4,5,4,3,2,89,5};
-
-    
-    
-    return 0;
-}
-
+#include "merge_sort.h"
 
 void merge (unsigned *arr, unsigned *buffer, size_t left, size_t mid, size_t right)
 {
@@ -24,34 +7,35 @@ void merge (unsigned *arr, unsigned *buffer, size_t left, size_t mid, size_t rig
     
     while (left + it1 < mid && mid + it2 < right) 
     {
-        if (arr [left + it1] < arr [mid + it2]) 
+        if (arr [left + it1] <= arr [mid + it2]) 
         {
-            buffer [it1 + it2] = arr [left + it1];
+            buffer [left + it1 + it2] = arr [left + it1];
             it1++;
         } 
         else 
         {
-            buffer [it1 + it2] = arr [mid + it2];
+            buffer [left + it1 + it2] = arr [mid + it2];
             it2++;
         }
     }
 
     while (left + it1 < mid) 
     {
-        buffer [it1 + it2] = arr [left + it1];
+        buffer [left + it1 + it2] = arr [left + it1];
         it1++;
     }
 
     while (mid + it2 < right) 
     {
-        buffer [it1 + it2] = arr [mid + it2];
+        buffer [left + it1 + it2] = arr [mid + it2];
         it2++;
     }
 
-    for (size_t i = 0; i < it1 + it2; i++) 
+    for (size_t i = left; i < right; i++) 
     {
-        arr [left + i] = buffer [i];
+        arr [i] = buffer [i];
     }
+    return;
 }
 
 
