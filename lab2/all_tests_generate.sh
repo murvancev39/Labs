@@ -23,7 +23,7 @@ done
 
 mkdir -p tests/big_tests
 echo "big tests generating"
-for (( size=0 ; size<=1000000; size+=5000))
+for (( size=0 ; size<=1000000; size+=10000))
 do
     echo -ne "Processing: size $size\r"
     for (( i=0 ; i < 5; i++ ))
@@ -50,12 +50,4 @@ do
 
     done
 done
-
-mkdir -p tests_results/part_1/small_tests
-mkdir -p tests_results/part_1/big_tests
-mkdir -p tests_results/part_1/test_most_dublicates
-
-gcc testing.c tester.c quadratic_sorts.c part_1.c -o part1.exe
-echo "--------------- PART 1 ---------------"
-./part1.exe
 

@@ -1,7 +1,6 @@
 import os
 import matplotlib.pyplot as plt
 
-# Теперь указываем корневую папку, откуда начинаем поиск
 base_dir = "tests_results"
 
 # Словарик с твоими шагами из C-кода
