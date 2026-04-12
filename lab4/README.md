@@ -114,7 +114,8 @@ make part_1        # Тесты для целых чисел (unsigned int)
 make part_2        # Тесты для дробных чисел (float)
 make part_3        # Тесты для строк (string)
 make run_part_1_3  # Запустить все тесты по очереди
-make clean         # Удалить мусор (obj/ и bin/)
+make plot          # Рисует графики
+make clean         # Удалить мусор (obj/ res/ plots/ bin/)
 ```
 
 

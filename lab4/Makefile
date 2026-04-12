@@ -4,6 +4,7 @@ OBJ_DIR = obj
 BIN_DIR = bin
 SRC_DIR = src
 RES_DIR = res
+PLOT_DIR = plots
 TESTS_DIR = tests
 
 SRC_FILES  = $(wildcard $(SRC_DIR)/*.c)
@@ -49,7 +50,11 @@ run_part_1_3: $(TARGET)
 	./$(TARGET) -F > $(RES_DIR)/results_float.txt
 	./$(TARGET) -S > $(RES_DIR)/results_string.txt
 
+plot: $(RES_DIR)
+	python plotter.py
+
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR) $(RES_DIR) $(PLOT_DIR)
+
 
 .PHONY: all clean
