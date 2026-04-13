@@ -1,19 +1,24 @@
 #include "hash_f_part_1.h"
 
-unsigned hash_f_u_rem (unsigned val)
+unsigned hash_f_u_rem (void *key)
 {
-    return val % 1000;
+    return *((unsigned *) key) % 1000;
 }
 
-unsigned hash_f_u_bits (unsigned val)
+unsigned hash_f_u_bits (void *key)
 {
-    return (val >> 3) % 1000;
+    return (*((unsigned *) key) >> 3) % 1000;
 }
 
-unsigned hash_f_u_knuth (unsigned key)
+unsigned hash_f_u_knuth (void *key)
 {
     const double A = 0.6180339887;
-    double val = (double) key * A;
+    double val = ((double) *((unsigned *) key)) * A;
     return (unsigned int) (1000 * (val - (long) val));
+}
+
+int unsigned_cmp (void *key1, void *key2)
+{
+    return *((unsigned *) key1) - *((unsigned *) key2);
 }
 

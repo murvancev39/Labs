@@ -17,6 +17,10 @@ typedef struct
 
 
 open_hash_table_t *open_hash_table_ctr (size_t size, float load_factor);
+void open_hash_table_dtr (open_hash_table_t *table);
+unsigned hash (void *key);
+unsigned hash_2 (void *key);
+void open_hash_table_rehash (open_hash_table_t *table);
 
 open_hash_table_t *open_hash_table_ctr (size_t size, float load_factor)
 {
@@ -34,19 +38,17 @@ void open_hash_table_dtr (open_hash_table_t *table)
     free (table);
 }
 
-unsigned hash (unsigned x)
+unsigned hash (void *key)
 {
-    return (x * 2654435761u);
+    return ((unsigned) key * 2654435761u);
 }
 
-unsigned hash_2 (unsigned x)
+unsigned hash_2 (void *key)
 {
-    return (x * 0x9e3779b1u) | 1;
+    return ((unsigned)  key * 0x9e3779b1u) | 1;
 }
 
-
-
-void open_hash_table_rehash (open_hash_table_t *table, int (*add_func) (open_hash_table_t *, unsigned))
+void open_hash_table_rehash (open_hash_table_t *table)
 {
     size_t old_size = table->size;
     unsigned *old_arr = table->arr;
@@ -64,182 +66,182 @@ void open_hash_table_rehash (open_hash_table_t *table, int (*add_func) (open_has
     free(old_arr);
 }
 
-// ------------------------------------------------------------------------------------------
-// LINEAR
-// ------------------------------------------------------------------------------------------
-int open_hash_table_add_linear (open_hash_table_t *table, unsigned key)
-{
-    if ((float)(table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table, open_hash_table_add_linear);
+// // ------------------------------------------------------------------------------------------
+// // LINEAR
+// // ------------------------------------------------------------------------------------------
+// int open_hash_table_add_linear (open_hash_table_t *table, unsigned key)
+// {
+//     if ((float)(table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table, open_hash_table_add_linear);
 
-    size_t h = hash (key);
+//     size_t h = hash (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + i) % table->size;
-        if (table->arr [curr_idx] == key) return 0;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + i) % table->size;
+//         if (table->arr [curr_idx] == key) return 0;
 
-        if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
-        {
-            table->arr [curr_idx] = key;
-            table->count++;
-            return 1;
-        }
-    }
-    return -1;
-}
+//         if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
+//         {
+//             table->arr [curr_idx] = key;
+//             table->count++;
+//             return 1;
+//         }
+//     }
+//     return -1;
+// }
 
-int open_hash_table_search_linear (open_hash_table_t *table, unsigned key)
-{
-    size_t h = hash (key);
+// int open_hash_table_search_linear (open_hash_table_t *table, unsigned key)
+// {
+//     size_t h = hash (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + i) % table->size;
-        if (table->arr [curr_idx] == key) return (int) curr_idx;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + i) % table->size;
+//         if (table->arr [curr_idx] == key) return (int) curr_idx;
 
-        if (table->arr [curr_idx] == empty) return -1;
-    }
-    return -1;
-}
+//         if (table->arr [curr_idx] == empty) return -1;
+//     }
+//     return -1;
+// }
 
-int open_hash_table_delete_linear (open_hash_table_t *table, unsigned key)
-{
-    size_t h = hash (key);
+// int open_hash_table_delete_linear (open_hash_table_t *table, unsigned key)
+// {
+//     size_t h = hash (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + i) % table->size;
-        if (table->arr [curr_idx] == key)
-        {
-            table->count--;
-            table->arr [curr_idx] = deleted;
-            return 1;
-        }
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + i) % table->size;
+//         if (table->arr [curr_idx] == key)
+//         {
+//             table->count--;
+//             table->arr [curr_idx] = deleted;
+//             return 1;
+//         }
 
-        if (table->arr [curr_idx] == empty) return 0;
-    }
-    return 0;
-}
+//         if (table->arr [curr_idx] == empty) return 0;
+//     }
+//     return 0;
+// }
 
 
-// ------------------------------------------------------------------------------------------
-// QUADRATIC
-// ------------------------------------------------------------------------------------------
+// // ------------------------------------------------------------------------------------------
+// // QUADRATIC
+// // ------------------------------------------------------------------------------------------
 
-int open_hash_table_add_quadratic (open_hash_table_t *table, unsigned key)
-{
-    if ((float)(table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table, open_hash_table_add_quadratic);
+// int open_hash_table_add_quadratic (open_hash_table_t *table, unsigned key)
+// {
+//     if ((float)(table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table, open_hash_table_add_quadratic);
 
-    size_t h = hash (key);
+//     size_t h = hash (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + (i*i + i) / 2) % table->size;
-        if (table->arr [curr_idx] == key) return 0;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + (i*i + i) / 2) % table->size;
+//         if (table->arr [curr_idx] == key) return 0;
 
-        if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
-        {
-            table->arr [curr_idx] = key;
-            table->count++;
-            return 1;
-        }
-    }
-    return -1;
-}
+//         if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
+//         {
+//             table->arr [curr_idx] = key;
+//             table->count++;
+//             return 1;
+//         }
+//     }
+//     return -1;
+// }
 
-int open_hash_table_search_quadratic (open_hash_table_t *table, unsigned key)
-{
-    size_t h = hash (key);
+// int open_hash_table_search_quadratic (open_hash_table_t *table, unsigned key)
+// {
+//     size_t h = hash (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + (i*i + i) / 2) % table->size;
-        if (table->arr [curr_idx] == key) return (int) curr_idx;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + (i*i + i) / 2) % table->size;
+//         if (table->arr [curr_idx] == key) return (int) curr_idx;
 
-        if (table->arr [curr_idx] == empty) return -1;
-    }
-    return -1;
-}
+//         if (table->arr [curr_idx] == empty) return -1;
+//     }
+//     return -1;
+// }
 
-int open_hash_table_delete_quadratic (open_hash_table_t *table, unsigned key)
-{
-    size_t h = hash (key);
+// int open_hash_table_delete_quadratic (open_hash_table_t *table, unsigned key)
+// {
+//     size_t h = hash (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + (i*i + i) / 2) % table->size;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + (i*i + i) / 2) % table->size;
         
-        if (table->arr [curr_idx] == key)
-        {
-            table->count--;
-            table->arr [curr_idx] = deleted;
-            return 1;
-        }
+//         if (table->arr [curr_idx] == key)
+//         {
+//             table->count--;
+//             table->arr [curr_idx] = deleted;
+//             return 1;
+//         }
 
-        if (table->arr [curr_idx] == empty) return 0;
-    }
-    return 0;
-}
+//         if (table->arr [curr_idx] == empty) return 0;
+//     }
+//     return 0;
+// }
 
-// ------------------------------------------------------------------------------------------
-// DOUBLE
-// ------------------------------------------------------------------------------------------
+// // ------------------------------------------------------------------------------------------
+// // DOUBLE
+// // ------------------------------------------------------------------------------------------
 
 
-int open_hash_table_add_double (open_hash_table_t *table, unsigned key)
-{
-    if ((float)(table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table, open_hash_table_add_double);
+// int open_hash_table_add_double (open_hash_table_t *table, unsigned key)
+// {
+//     if ((float)(table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table, open_hash_table_add_double);
 
-    size_t h = hash (key);
-    size_t h_2 = hash_2 (key);
+//     size_t h = hash (key);
+//     size_t h_2 = hash_2 (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + i * h_2) % table->size;
-        if (table->arr [curr_idx] == key) return 0;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + i * h_2) % table->size;
+//         if (table->arr [curr_idx] == key) return 0;
 
-        if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
-        {
-            table->arr [curr_idx] = key;
-            table->count++;
-            return 1;
-        }
-    }
-    return -1;
-}
+//         if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
+//         {
+//             table->arr [curr_idx] = key;
+//             table->count++;
+//             return 1;
+//         }
+//     }
+//     return -1;
+// }
 
-int open_hash_table_search_double (open_hash_table_t *table, unsigned key)
-{
-    size_t h = hash (key);
-    size_t h_2 = hash_2 (key);
+// int open_hash_table_search_double (open_hash_table_t *table, unsigned key)
+// {
+//     size_t h = hash (key);
+//     size_t h_2 = hash_2 (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + i * h_2) % table->size;
-        if (table->arr [curr_idx] == key) return (int) curr_idx;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + i * h_2) % table->size;
+//         if (table->arr [curr_idx] == key) return (int) curr_idx;
 
-        if (table->arr [curr_idx] == empty) return -1;
-    }
-    return -1;
-}
+//         if (table->arr [curr_idx] == empty) return -1;
+//     }
+//     return -1;
+// }
 
-int open_hash_table_delete_double (open_hash_table_t *table, unsigned key)
-{
-    size_t h = hash (key);
-    size_t h_2 = hash_2 (key);
+// int open_hash_table_delete_double (open_hash_table_t *table, unsigned key)
+// {
+//     size_t h = hash (key);
+//     size_t h_2 = hash_2 (key);
 
-    for (size_t i = 0; i < table->size; i++)
-    {
-        size_t curr_idx = (h + i * h_2) % table->size;
+//     for (size_t i = 0; i < table->size; i++)
+//     {
+//         size_t curr_idx = (h + i * h_2) % table->size;
         
-        if (table->arr [curr_idx] == key)
-        {
-            table->count--;
-            table->arr [curr_idx] = deleted;
-            return 1;
-        }
+//         if (table->arr [curr_idx] == key)
+//         {
+//             table->count--;
+//             table->arr [curr_idx] = deleted;
+//             return 1;
+//         }
 
-        if (table->arr [curr_idx] == empty) return 0;
-    }
-    return 0;
-}
+//         if (table->arr [curr_idx] == empty) return 0;
+//     }
+//     return 0;
+// }

@@ -31,6 +31,9 @@ $(OBJ_DIR)/%.o: $(TESTS_DIR)/%.c | $(OBJ_DIR)
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
+$(RES_DIR):
+	mkdir -p $(RES_DIR)
+
 
 part_1: $(TARGET)
 	mkdir -p $(RES_DIR)

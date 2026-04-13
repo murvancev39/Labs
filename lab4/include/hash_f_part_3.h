@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned hash_f_s_len (char *key);
-unsigned hash_f_s_sum (char *key);
-unsigned hash_f_s_polinom (char *key);
-unsigned hash_f_s_crc32 (char *key);
+unsigned hash_f_s_len (void *key);
+unsigned hash_f_s_sum (void *key);
+unsigned hash_f_s_polinom (void *key);
+unsigned hash_f_s_src32 (void *key);
+int string_cmp (void *key1, void *key2);
 
 static const unsigned int crc32_table [] =
 {

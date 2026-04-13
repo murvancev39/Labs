@@ -1,46 +1,52 @@
 #include "hash_f_part_3.h"
 
-unsigned hash_f_s_len (char *key)
+unsigned hash_f_s_len (void *key)
 {
-    return strlen (key);
+    return strlen ((char *) key);
 }
 
-unsigned hash_f_s_sum (char *key)
+unsigned hash_f_s_sum (void *key)
 {
     unsigned sum = 0;
-    char *one_char = key;
+    char *one_char = (char *) key;
     while (*one_char != '\0')
     {
         sum += *one_char;
         one_char++;
     }
-    return sum % 1000;
+    return sum;
 }
 
-unsigned hash_f_s_polinom (char *key)
+unsigned hash_f_s_polinom (void *key)
 {
     unsigned sum = 0;
     unsigned i = 0;
     unsigned cur_coef = 1;
-    while (key [i] != '\0')
+    unsigned char x = 0;
+    while ((x = (((char *) key) [i])) != '\0')
     {
-        sum += key [i] * cur_coef;
+        sum += x * cur_coef;
         cur_coef *= 31;
         i++;
     }
-    return sum % 1000;
+    return sum;
 }
 
-unsigned hash_f_s_crc32 (char *key)
+unsigned hash_f_s_src32 (void *key)
 {   
     const unsigned char *string = (const unsigned char *) key;
     unsigned len = strlen (key);
     unsigned init = 0xFFFFFFFF;
-    unsigned crc = init;
+    unsigned src = init;
     while (len--)
     {
-        crc = (crc << 8) ^ crc32_table [((crc >> 24) ^ * string) & 255];
+        src = (src << 8) ^ crc32_table [((src >> 24) ^ * string) & 255];
         string++;
     }
-    return crc % 1000;
+    return src;
 }   
+
+int string_cmp (void *key1, void *key2)
+{
+    return strcmp ((const char *) key1, (const char *) key2);
+}

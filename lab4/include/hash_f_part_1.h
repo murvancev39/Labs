@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned hash_f_u_rem (unsigned val);
-unsigned hash_f_u_bits (unsigned val);
-unsigned hash_f_u_knuth (unsigned key);
+unsigned hash_f_u_rem (void *key);
+unsigned hash_f_u_bits (void *key);
+unsigned hash_f_u_knuth (void *key);
+int unsigned_cmp (void *key1, void *key2);
 
 #endif

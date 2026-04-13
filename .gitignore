@@ -1,0 +1,6 @@
+*.exe
+*.o
+*.txt
+bin/
+obj/
+res/

@@ -13,21 +13,10 @@
 
 typedef struct
 {
-    unsigned (*hash_func)(unsigned);
+    unsigned (*hash_func)(void *);
     char func_name [11];
-} unsigned_interface;
+} interface;
 
-typedef struct
-{
-    unsigned (*hash_func)(float);
-    char func_name [11];
-} float_interface;
-
-typedef struct
-{
-    unsigned (*hash_func)(char *);
-    char func_name [11];
-} strings_interface;
 
 void strings_arr_dtr (char **arr, size_t size);
 
@@ -46,63 +35,57 @@ int main (int argc, char *argv[])
     
     if (flag_u)
     {
-        chained_hash_table_t *table = chained_hash_table_ctr (TABLE_SIZE);
         unsigned *arr = unsigned_test_gen (MILLION);
-        unsigned_interface interface [3] = {{hash_f_u_bits, "BITS"}, {hash_f_u_rem, "REMAIND"}, {hash_f_u_knuth, "KNUTH"}};
+        interface cur_interface [3] = {{hash_f_u_bits, "BITS"}, {hash_f_u_rem, "REMAIND"}, {hash_f_u_knuth, "KNUTH"}};
         for (int k = 0; k < 3; k++)
         {
-            printf ("### TEST: UNSIGNED_%s\n", interface [k].func_name);
-            unsigned (*hash_func) (unsigned) = interface [k].hash_func;
-            for (unsigned i = 0; i < MILLION; i++) chained_hash_table_add (table, arr + i, hash_func (arr [i]));
+            printf ("### TEST: UNSIGNED_%s\n", cur_interface [k].func_name);
+            chained_hash_table_t *table = chained_hash_table_ctr (TABLE_SIZE, 0, cur_interface [k].hash_func, unsigned_cmp);
+            for (unsigned i = 0; i < MILLION; i++) chained_hash_table_add (table, arr + i);
             for (unsigned i = 0; i < TABLE_SIZE; i++) 
             {
                 if (table->collision_arr [i]) printf ("%u %u\n",i , table->collision_arr [i]);
             }
-            chained_hash_table_clean (table);
+            chained_hash_table_dtr (table);
         }
-        chained_hash_table_dtr (table);
         free (arr);
     }
 
     if (flag_f)
     {
-        chained_hash_table_t *table = chained_hash_table_ctr (TABLE_SIZE);
         float *arr = float_test_gen (MILLION);
-        float_interface interface [5] = {{hash_f_f_int, "INT"}, {hash_f_f_union, "BITS"},
-                            {hash_f_f_exp, "EXP"}, {hash_f_f_mantiss, "MANTISSA"}, {hash_f_f_mant_exp, "EXP_MANTIS"}};
+        interface cur_interface [5] = {{hash_f_f_int, "INT"}, {hash_f_f_union, "BITS"},
+        {hash_f_f_exp, "EXP"}, {hash_f_f_mantiss, "MANTISSA"}, {hash_f_f_mant_exp, "EXP_MANTIS"}};
         for (int k = 0; k < 5; k++)
         {
-            printf ("### TEST: FLOAT_%s\n", interface [k].func_name);
-            unsigned (*hash_func) (float) = interface [k].hash_func;
-            for (unsigned i = 0; i < MILLION; i++) chained_hash_table_add (table, arr + i, hash_func (arr [i]));
-            for (unsigned i = 0; i < TABLE_SIZE; i++) 
+            printf ("### TEST: FLOAT_%s\n", cur_interface [k].func_name);
+            chained_hash_table_t *table = chained_hash_table_ctr (TABLE_SIZE, 0, cur_interface [k].hash_func, float_cmp);
+            for (unsigned i = 0; i < MILLION; i++) chained_hash_table_add (table, arr + i);
+            for (unsigned i = 0; i < TABLE_SIZE; i++)
             {
                 if (table->collision_arr [i]) printf ("%u %u\n",i , table->collision_arr [i]);
             }
-            chained_hash_table_clean (table);
+            chained_hash_table_dtr (table);
         }
-        chained_hash_table_dtr (table);
         free (arr);
     }
 
     if (flag_s)
     {
-        chained_hash_table_t *table = chained_hash_table_ctr (TABLE_SIZE);
         char **arr = string_test_gen (MILLION);
-        strings_interface interface [4] = {{hash_f_s_len, "LEN"}, {hash_f_s_sum, "SUM"},
-                            {hash_f_s_polinom, "POLINOM"}, {hash_f_s_crc32, "SRC_32"}};
+        interface cur_interface [4] = {{hash_f_s_len, "LEN"}, {hash_f_s_sum, "SUM"},
+        {hash_f_s_polinom, "POLINOM"}, {hash_f_s_src32, "SRC_32"}};
         for (int k = 0; k < 4; k++)
         {
-            printf ("### TEST: STRINGS_%s\n", interface [k].func_name);
-            unsigned (*hash_func) (char *) = interface [k].hash_func;
-            for (unsigned i = 0; i < MILLION; i++) chained_hash_table_add (table, arr + i, hash_func (arr [i]));
+            printf ("### TEST: STRINGS_%s\n", cur_interface [k].func_name);
+            chained_hash_table_t *table = chained_hash_table_ctr (TABLE_SIZE, 0, cur_interface [k].hash_func, string_cmp);
+            for (unsigned i = 0; i < MILLION; i++) chained_hash_table_add (table, arr [i]);
             for (unsigned i = 0; i < TABLE_SIZE; i++) 
             {
                 if (table->collision_arr [i]) printf ("%u %u\n",i , table->collision_arr [i]);
             }
-            chained_hash_table_clean (table);
+            chained_hash_table_dtr (table);
         }
-        chained_hash_table_dtr (table);
         strings_arr_dtr (arr, MILLION);
     }
     return 0;

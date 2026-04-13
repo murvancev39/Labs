@@ -1,11 +1,16 @@
 #include "hash_table_chained.h"
 
-chained_hash_table_t *chained_hash_table_ctr (size_t size)
+chained_hash_table_t *chained_hash_table_ctr (size_t size, float load_factor,
+                                unsigned (*hash_f) (void *), int (*cmp) (void *, void *))
 {
     chained_hash_table_t *table = (chained_hash_table_t *) malloc (1 * sizeof (chained_hash_table_t));
     table->nodes_arr = (node_t **) calloc (size, sizeof (node_t *));
     table->collision_arr = (unsigned *) calloc (size, sizeof (unsigned));
+    table->load_factor = load_factor;
+    table->count = 0;
     table->size = size;
+    table->hash_f = hash_f;
+    table->cmp = cmp;
     return table;   
 }
 
@@ -49,11 +54,20 @@ void nodes_dtr (node_t *node)
     }
 }
 
-int chained_hash_table_add (chained_hash_table_t *table, void *key, unsigned idx)
+int chained_hash_table_add (chained_hash_table_t *table, void *key)
 {
+    if ((!table) || (!key)) return 0;
+    if ((table->load_factor != 0) && (((float) table->count) / ((float) table->size) > table->load_factor))
+    {
+        rehash (table, chained_hash_table_add);
+    } 
+    unsigned idx = table->hash_f (key) % table->size;
+
     table->collision_arr [idx]++;
     node_t *node = (node_t *) malloc (1 * sizeof (node_t));
+
     if (!node) return 0;
+
     node->key = key;
     node->next = table->nodes_arr [idx];
     table->nodes_arr [idx] = node;
@@ -61,40 +75,41 @@ int chained_hash_table_add (chained_hash_table_t *table, void *key, unsigned idx
     return 1;
 }
 
-int chained_hash_table_unsigned_search (chained_hash_table_t *table, void *key, unsigned hash_f_val)
+int chained_hash_table_search (chained_hash_table_t *table, void *key)
 {
-    unsigned uns_key = *((unsigned *) key);
-    node_t *node = table->nodes_arr [hash_f_val];
+    node_t *node = table->nodes_arr [table->hash_f (key) % table->size];
     while (node != NULL)
     {
-        if (*((unsigned *) node->key) == uns_key) return 1;
+        if (!table->cmp (key, node->key)) return 1;
         node = node->next;
     }
     return 0;
 }
 
-int chained_hash_table_unsigned_delete (chained_hash_table_t *table, void *key, unsigned hash_f_val)
+int chained_hash_table_delete (chained_hash_table_t *table, void *key)
 {
-    unsigned uns_key = *((unsigned *) key);
-    node_t *prev_node = table->nodes_arr [hash_f_val];
+    unsigned idx = table->hash_f (key) % table->size;
+    node_t *prev_node = table->nodes_arr [idx];
     if (prev_node == NULL) return 0;
     node_t *node = prev_node->next;
 
-    if (*(unsigned *) prev_node->key == uns_key)
+    if (!table->cmp (key, prev_node->key))
     {
-        table->nodes_arr [hash_f_val] = node;
+        table->nodes_arr [idx] = node;
         free (prev_node);
         table->count--;
+        table->collision_arr [idx]--;
         return 1;
     }
 
     while (node != NULL)
     {
-        if (*((unsigned *) node->key) == uns_key)
+        if (!table->cmp (key, node->key))
         {
             prev_node->next = node->next;
             free (node);
             table->count--;
+            table->collision_arr [idx]--;
             return 1;
         }
         prev_node = node;
@@ -103,11 +118,13 @@ int chained_hash_table_unsigned_delete (chained_hash_table_t *table, void *key, 
     return 0;
 }
 
-void rehash (chained_hash_table_t *table, int (*add_func)(chained_hash_table_t *, void *, unsigned))
+void rehash (chained_hash_table_t *table, int (*add_func) (chained_hash_table_t *, void *))
 {
     size_t old_size = table->size;
     node_t **old_nodes = table->nodes_arr;
     unsigned *old_collisions = table->collision_arr;
+    node_t *curr = NULL;
+    node_t *to_free;
 
     table->size *= 2;
     table->count = 0;
@@ -117,15 +134,12 @@ void rehash (chained_hash_table_t *table, int (*add_func)(chained_hash_table_t *
 
     for (size_t i = 0; i < old_size; i++)
     {
-        node_t *curr = old_nodes [i];
+        curr = old_nodes [i];
         while (curr)
         {
-            unsigned key_val = *((unsigned *) curr->key);
-            unsigned new_idx = table->hash_f (key_val) % table->size;
+            add_func (table, curr->key);
 
-            add_func (table, curr->key, new_idx);
-
-            node_t *to_free = curr;
+            to_free = curr;
             curr = curr->next;
             free (to_free); 
         }
