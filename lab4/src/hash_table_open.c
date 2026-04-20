@@ -1,26 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-typedef enum
-{
-    empty = 0,
-    deleted = 0xFFFFFFFF,
-} status;
-
-typedef struct
-{
-    unsigned *arr;
-    size_t size;
-    size_t count;
-    float load_factor; 
-} open_hash_table_t;
-
-
-open_hash_table_t *open_hash_table_ctr (size_t size, float load_factor);
-void open_hash_table_dtr (open_hash_table_t *table);
-unsigned hash (void *key);
-unsigned hash_2 (void *key);
-void open_hash_table_rehash (open_hash_table_t *table);
+#include "hash_table_open.h"
 
 open_hash_table_t *open_hash_table_ctr (size_t size, float load_factor)
 {
@@ -51,44 +29,44 @@ unsigned hash_2 (void *key)
 void open_hash_table_rehash (open_hash_table_t *table)
 {
     size_t old_size = table->size;
-    unsigned *old_arr = table->arr;
+    void **old_arr = table->arr;
 
     table->size *= 2;
-    table->arr = (unsigned *) calloc (table->size, sizeof (unsigned));
+    table->arr = (void **) calloc (table->size, sizeof (void *));
     
     table->count = 0;
 
     for (size_t i = 0; i < old_size; i++)
     {
-        if (old_arr [i] != empty && old_arr [i] != deleted) add_func (table, old_arr [i]);
+        if (old_arr [i] != EMPTY && (old_arr [i] != DELETED)) open_hash_table_add (table, old_arr [i]);
     }
 
     free(old_arr);
 }
 
-// // ------------------------------------------------------------------------------------------
-// // LINEAR
-// // ------------------------------------------------------------------------------------------
-// int open_hash_table_add_linear (open_hash_table_t *table, unsigned key)
-// {
-//     if ((float)(table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table, open_hash_table_add_linear);
+// ------------------------------------------------------------------------------------------
+// LINEAR
+// ------------------------------------------------------------------------------------------
+int open_hash_table_add (open_hash_table_t *table, void *key)
+{
+    if ((float) (table->count + 1) / table->size > table->load_factor) open_hash_table_rehash (table);
 
-//     size_t h = hash (key);
+    size_t h = table->hash_f1 (table, key);
 
-//     for (size_t i = 0; i < table->size; i++)
-//     {
-//         size_t curr_idx = (h + i) % table->size;
-//         if (table->arr [curr_idx] == key) return 0;
+    for (size_t i = 0; i < table->size; i++)
+    {
+        size_t curr_idx = (h + i) % table->size;
+        if (table->arr [curr_idx] == key) return 0;
 
-//         if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
-//         {
-//             table->arr [curr_idx] = key;
-//             table->count++;
-//             return 1;
-//         }
-//     }
-//     return -1;
-// }
+        if (table->arr [curr_idx] == empty || table->arr [curr_idx] == deleted)
+        {
+            table->arr [curr_idx] = key;
+            table->count++;
+            return 1;
+        }
+    }
+    return -1;
+}
 
 // int open_hash_table_search_linear (open_hash_table_t *table, unsigned key)
 // {
