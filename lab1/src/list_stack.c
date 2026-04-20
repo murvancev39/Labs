@@ -3,7 +3,7 @@
 void *list_stack_ctr (size_t element_size)
 {
     struct list_stack *stack_ptr = (struct list_stack *) calloc (1, sizeof (struct list_stack));
-    assert (stack_ptr);
+    if (!stack_ptr) return NULL;
 
     stack_ptr->employment = 0;
     stack_ptr->head = NULL;
@@ -14,8 +14,9 @@ void *list_stack_ctr (size_t element_size)
 
 int list_push (void *stack_ptr, void *buffer)
 {
-    assert (stack_ptr);
-    assert (buffer);
+    if (!buffer) return 0;
+    if (!stack_ptr) return 0;
+    
     struct list_stack *stack = stack_ptr;
 
     struct node *new_node = (struct node *) calloc (1, sizeof (struct node));
@@ -44,8 +45,8 @@ int list_push (void *stack_ptr, void *buffer)
 
 int list_top (void *stack_ptr, void *buffer)
 {
-    assert (stack_ptr);
-    assert (buffer);
+    if (!buffer) return 0;
+    if (!stack_ptr) return 0;
     struct list_stack *stack = stack_ptr;
 
     if (stack->employment == 0)
@@ -60,7 +61,7 @@ int list_top (void *stack_ptr, void *buffer)
 
 int list_pop (void *stack_ptr)
 {
-    assert (stack_ptr);
+    if (!stack_ptr) return 0;
     struct list_stack *stack = stack_ptr;
 
     if (stack->employment == 0)
@@ -98,5 +99,6 @@ void *list_stack_dtr (void *stack_ptr)
 
 int list_get_employment (void *stack_ptr)
 {
+    if (!stack_ptr) return -1;
     return ((int) (((struct list_stack *)stack_ptr)->employment));
 }

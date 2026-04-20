@@ -1,15 +1,16 @@
-.PHONY: all run plot clean
+.PHONY: all run plot clean doc
 
 TARGET = tester
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Iinclude
+CFLAGS = -O3 -Wall -Wextra -Iinclude
 
 SRC_DIR = src
 OBJ_DIR = obj
 RES_DIR = res
-PLT_DIR = plots
+PLT_DIR = plot
 BIN_DIR = bin
+DOC_DIR = doc
 
 SOURCES = $(wildcard $(SRC_DIR)/*.c)
 OBJECT_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SOURCES))
@@ -30,12 +31,22 @@ run: $(TARGET)
 	mkdir -p $(RES_DIR)/arr $(RES_DIR)/list
 	(cd $(RES_DIR)/arr && ../../$(TARGET) -A)
 	(cd $(RES_DIR)/list && ../../$(TARGET) -L)
+	rm -f $(TARGET)
 
-plot: run
-	mkdir -p $(PLT_DIR)
-	python3 laba.py
+plot:
+	python laba.py
+
+doc:
+	"doxygen" Doxyfile
+	start "" "$(DOC_DIR)/html/index.html"
 
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET)
-	rm -rf $(RES_DIR)/*.txt
+	rm -rf $(RES_DIR)/*/*.txt
+	rm -rf $(RES_DIR)/*
+	rm -rf $(RES_DIR)
 	rm -rf $(PLT_DIR)/*.png
+	rm -rf $(PLT_DIR)
+	rm -rf $(DOC_DIR)/*/*
+	rm -rf $(DOC_DIR)/*
+	rm -rf $(DOC_DIR)

@@ -59,8 +59,9 @@ int main (int argc, char *argv[])
                                     };
         
         double test_result = 0;
-        for (int num_elements = 1000; num_elements <= 1000000; num_elements+=1000)
+        for (int num_elements = 10000; num_elements <= 1000000; num_elements+=10000)
         {
+            if (num_elements / 100000 != 0) printf ("\rprogres %d/10", num_elements / 100000);
             test_result = test_1 (num_elements, &interface);
             fprintf (first_arr, "%d %lf\n", num_elements, test_result);
             
@@ -73,7 +74,7 @@ int main (int argc, char *argv[])
             test_result = test_4 (num_elements, &interface);
             fprintf (fourth_arr, "%d %lf\n", num_elements, test_result);
         }
-        
+        printf ("\n");
         fclose (first_arr);
         fclose (second_arr);
         fclose (third_arr);
@@ -101,8 +102,9 @@ int main (int argc, char *argv[])
                                     };
         
         double test_result = 0;
-        for (int num_elements = 1000; num_elements <= 1000000; num_elements+=1000)
+        for (int num_elements = 10000; num_elements <= 1000000; num_elements+=10000)
         {
+            if (num_elements / 100000 != 0) printf ("\rprogres %d/10", num_elements / 100000);
             test_result = test_1 (num_elements, &interface);
             fprintf (first_list, "%d %lf\n", num_elements, test_result);
             
@@ -116,6 +118,7 @@ int main (int argc, char *argv[])
             fprintf (fourth_list, "%d %lf\n", num_elements, test_result);
         }
         
+        printf ("\n");
         fclose (first_list);
         fclose (second_list);
         fclose (third_list);
@@ -132,6 +135,7 @@ double test_1 (int num_elements, stack_functions *interface)
     for (int num_test = 0; num_test < 3; num_test++)
     {
         void *stack_ptr = interface->stack_ctr (sizeof (int));
+        if (!stack_ptr) return -1.0;
 
         clock_t cur_time = clock ();
 
@@ -171,7 +175,7 @@ double test_2 (int num_elements, stack_functions *interface)
     for (int num_test = 0; num_test < 3; num_test++)
     {
         void *stack_ptr = interface->stack_ctr (sizeof (int));
-
+        if (!stack_ptr) return -1.0;
         clock_t cur_time = clock ();
 
         for (int i = 0; i <= num_elements; i++)
@@ -236,6 +240,7 @@ double test_3 (int num_elements, stack_functions *interface)
     for (int num_test = 0; num_test < 3; num_test++)
     {
         void *stack_ptr = interface->stack_ctr (sizeof (int));
+        if (!stack_ptr) return -1.0;
 
         for (int i = 0; i <= num_elements; i++)
         {
@@ -274,6 +279,7 @@ double test_4 (int num_elements, stack_functions *interface)
     for (int num_test = 0; num_test < 3; num_test++)
     {
         void *stack_ptr = interface->stack_ctr (sizeof (int));
+        if (!stack_ptr) return -1.0;
         
         clock_t cur_time = clock ();
 

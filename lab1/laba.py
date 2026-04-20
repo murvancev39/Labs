@@ -1,93 +1,71 @@
-import matplotlib.pyplot as plt
 import os
+import sys
+import matplotlib.pyplot as plt
 
-def draw_separate_plots():
-    filenames = [
-        "first_test.txt", 
-        "second_test.txt", 
-        "third_test.txt", 
-        "fourth_test.txt"
-    ]
-    
-    test_names = [
-        "Test 1: Mixed Push-Pop (Half-Quarter)",
-        "Test 2: Large Blocks Push-Pop",
-        "Test 3: Random Operations",
-        "Test 4: Pure Push"
-    ]
+def generate_plots():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    res_dir = os.path.join(base_dir, 'res')
+    plot_dir = os.path.join(base_dir, 'plot')
 
-    print("\n--- Анализ производительности ---")
+    if not os.path.exists(res_dir):
+        print(f"Error: Folder '{res_dir}' does not exist.")
+        sys.exit(1)
 
-    for i, fname in enumerate(filenames):
-        if not os.path.exists(fname):
-            print(f"Пропускаю: {fname} не найден.")
-            continue
+    list_folder = os.path.join(res_dir, 'list')
+    arr_folder = os.path.join(res_dir, 'arr')
 
-        n_values = []
-        times = []
+    if not os.path.exists(list_folder) or not os.path.exists(arr_folder):
+        print("Error: Required folders 'list' or 'arr' are missing.")
+        sys.exit(1)
 
-        # Читаем данные
-        with open(fname, 'r') as f:
+    l_files = sorted([f for f in os.listdir(list_folder) if f.endswith('.txt')])
+    a_files = sorted([f for f in os.listdir(arr_folder) if f.endswith('.txt')])
+
+    if not l_files or not a_files:
+        print("Error: One of the folders is empty.")
+        sys.exit(1)
+
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+
+    def read_data(path):
+        x, y = [], []
+        with open(path, 'r') as f:
             for line in f:
                 parts = line.split()
                 if len(parts) == 2:
-                    n_values.append(int(parts[0]))
-                    times.append(float(parts[1]))
+                    x.append(float(parts[0]))
+                    y.append(float(parts[1]))
+        return x, y
 
-        # Разделяем на массив и список (пополам)
-        mid = len(n_values) // 2
+    processed = False
+    for l_name, a_name in zip(l_files, a_files):
+        test_label = l_name.split('_')[0]
         
-        n_arr = n_values[:mid]
-        t_arr = times[:mid]
-        
-        n_list = n_values[mid:]
-        t_list = times[mid:]
+        lx, ly = read_data(os.path.join(list_folder, l_name))
+        ax, ay = read_data(os.path.join(arr_folder, a_name))
 
-        # --- СЧИТАЕМ РАЗНИЦУ В СКОРОСТИ ---
-        # Берем вторую половину данных (самые большие n), чтобы исключить 
-        # микро-погрешности и нули на старте графика
-        calc_start = len(t_arr) // 2
-        sum_arr = sum(t_arr[calc_start:])
-        sum_list = sum(t_list[calc_start:])
+        if not lx or not ax:
+            continue
 
-        if sum_arr > 0:
-            ratio = sum_list / sum_arr
-            stat_text = f"Массив быстрее в ~{ratio:.1f} раз"
-        else:
-            stat_text = "Данные слишком малы для сравнения"
-            
-        # Вывод в консоль
-        print(f"{test_names[i]}: {stat_text}")
-
-        # Создаем НОВЫЙ отдельный график
         plt.figure(figsize=(10, 6))
-        
-        plt.plot(n_arr, t_arr, label='Array Stack', color='#1f77b4', linewidth=2)
-        plt.plot(n_list, t_list, label='List Stack', color='#ff7f0e', linewidth=2)
-        
-        plt.title(test_names[i], fontsize=14)
-        plt.xlabel('Number of elements (n)', fontsize=12)
-        plt.ylabel('Time (seconds)', fontsize=12)
-        plt.grid(True, linestyle=':', alpha=0.7)
-        plt.legend(loc="upper right")
+        plt.plot(lx, ly, label='Linked List Stack', color='blue', linewidth=1.5)
+        plt.plot(ax, ay, label='Dynamic Array Stack', color='red', linewidth=1.5)
 
-        # Рисуем плашку с текстом на графике (слева вверху)
-        plt.annotate(
-            stat_text, 
-            xy=(0.02, 0.95), xycoords='axes fraction',
-            fontsize=12, fontweight='bold', color='darkred',
-            bbox=dict(boxstyle="round,pad=0.4", fc="#ffe6e6", ec="darkred", alpha=0.9),
-            verticalalignment='top'
-        )
-
-        # Сохраняем каждый тест в свой файл
-        output_name = f"plot_test_{i+1}.png"
-        plt.savefig(output_name, dpi=300, bbox_inches='tight')
+        plt.title(f'Stack Performance Comparison: {test_label.capitalize()}')
+        plt.xlabel('Number of Elements')
+        plt.ylabel('Time (ms/s)')
+        plt.legend()
+        plt.grid(True, linestyle='--', alpha=0.7)
         
-        # Закрываем текущий график
+        plt.savefig(os.path.join(plot_dir, f'{test_label}_comparison.png'))
         plt.close()
-        
-    print("---------------------------------\nГрафики успешно сохранены!")
+        print(f"Plot saved for: {test_label}")
+        processed = True
+
+    if not processed:
+        print("Error: No valid data found in files.")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    draw_separate_plots()
+    generate_plots()
