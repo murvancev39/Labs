@@ -1,7 +1,9 @@
 #include "testing.h"
 
-double *test_sort_func (const char *test_dir, sort_func_ptr sort_func, unsigned size, unsigned step)
+double *test_sort_func (const char *test_dir, sort_func_ptr_t sort_func, unsigned size, unsigned step)
 {
+    if (step == 0) return NULL;
+    
     char cur_path [128] = {};
 
     FILE *test_file_in  = NULL;
@@ -9,46 +11,59 @@ double *test_sort_func (const char *test_dir, sort_func_ptr sort_func, unsigned 
     
     
     double *time_arr = (double *) calloc (size / step, sizeof (double));
-
+    
     int size_idx = -1;
     int flag = 1;
-
-    for (unsigned cur_size = 0; cur_size <= size; cur_size += step)
+    
+    for (unsigned cur_size = step; cur_size <= size; cur_size += step)
     {
         size_idx++;
         double five_tests_time = 0;
-
+        
         printf ("\rProcessing: size %u ", cur_size);
         fflush (stdout);
-
-        for (int i = 0; i < 5; i++)
+        
+        for (unsigned i = 0; i < 5; i++)
         {
             sprintf (cur_path, "%s%u_%d.in", test_dir, cur_size, i);
-
+            
             test_file_in = fopen (cur_path, "r");
-            unsigned *arr = (unsigned *) calloc (cur_size, sizeof (unsigned));
-
-            for (int idx_string = 0; idx_string < cur_size; idx_string++)
+            if (!test_file_in) 
             {
-                fscanf (test_file_in, "%u", arr + idx_string);
+                return NULL;
             }
-
+            
+            unsigned *arr = (unsigned *) calloc (cur_size, sizeof (unsigned));
+            
+            for (unsigned idx_string = 0; idx_string < cur_size; idx_string++)
+            {
+                if (!fscanf (test_file_in, "%u", arr + idx_string))
+                {
+                    free (arr);
+                    fclose (test_file_in);
+                    assert (0);
+                }
+            }
+            
             five_tests_time -= get_mikro_time ();
             
             sort_func (arr, cur_size);
-
+            
             five_tests_time += get_mikro_time ();
-
+            
             sprintf (cur_path, "%s%u_%d.out", test_dir, cur_size, i);
+            
             test_file_out = fopen (cur_path, "r");
+            if (!test_file_out) return NULL;
             
             flag = check_sort (arr, test_file_out, cur_size);
-
+            
             free (arr);
             fclose (test_file_in);
             fclose (test_file_out);
-
-            assert (flag);
+            
+            assert (!flag);
+            // printf ("\n\n EBLAN %s \n\n", cur_path);
         }
 
         five_tests_time /= 5;
@@ -59,16 +74,23 @@ double *test_sort_func (const char *test_dir, sort_func_ptr sort_func, unsigned 
 
 int check_sort (unsigned *sorted_arr, FILE *test_file_out, unsigned size)
 {
+    if (!sorted_arr) return 1;
+    if (!test_file_out) return 1;
+
     unsigned val = 0;
     for (unsigned i = 0; i < size; i++)
     {
-        fscanf (test_file_out, "%u", &val);
+        if (!fscanf (test_file_out, "%u", &val))
+        {
+            return 1;
+        }
+        
         if (val != sorted_arr [i])
         {
-            return 0;
+            return 1;
         }
     }
-    return 1;
+    return 0;
 }
 
 double get_mikro_time () 

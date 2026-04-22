@@ -1,23 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 unsigned get_rand_below (unsigned max_val);
 
 int main (int argc, char *argv [])
 {
-    int size = atoi (argv [1]);
-    unsigned max_val = atoi (argv [2]);
+    if (argc != 3) return 0;
+
+    srand (time (NULL));
+    
+    unsigned size = 0, max_val = 0;
+    
+    size = atoi (argv [1]);
+    max_val = atoi (argv [2]);
 
     if (max_val == RAND_MAX)
     {
-        for (int i = 0; i < size; i++)
+        for (unsigned i = 0; i <= size; i++)
         {
             printf ("%u\n", rand ());
         }
         return 0;
     }
-
-    for (int i = 0; i < size; i++)
+    for (unsigned i = 0; i <= size; i++)
     {
         printf ("%u\n", get_rand_below (max_val));
     }

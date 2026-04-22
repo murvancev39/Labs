@@ -1,16 +1,5 @@
 #include "heap_sort.h"
 
-// int main ()
-// {
-//     unsigned arr [10] = {1,7,9,4,2,6,8,6,1,44};
-//     heap_sort_bottom_up_10 (arr, 10);
-//     for (int i = 0; i < 10; i++)
-//     {
-//         printf ("%u\n", arr [i]);
-//     }
-//     return 0;
-// }
-
 void swap (Heap *heap, size_t i, size_t j) 
 {
     unsigned temp = heap->arr [i];

@@ -1,64 +1,116 @@
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
+import glob
 
-base_dir = "tests_results"
+SOURCE_DIR = 'time_res'
+TARGET_DIR = 'plots'
+FILE_EXT = '.txt'
 
-# Словарик с твоими шагами из C-кода
-steps = {
-    "small_tests": 50,
-    "big_tests": 10000,
-    "test_most_dublicates": 10000
-}
+TEST_PREFIXES = [
+    'big_tests',
+    'most_dub_tests',
+    'small_tests'
+]
 
-# os.walk рекурсивно проходит по всем папкам внутри base_dir
-for root, dirs, files in os.walk(base_dir):
+def parse_filename(filename):
+    clean_name = os.path.splitext(filename)[0]
     
-    # Отфильтровываем файлы: нам нужны только файлы с тестами.
-    # Игнорируем картинки (png), скрытые файлы и системный мусор.
-    data_files = [f for f in files if not f.endswith('.png') and not f.startswith('.')]
+    for prefix in TEST_PREFIXES:
+        if clean_name.startswith(prefix + '_'):
+            algo_name = clean_name[len(prefix)+1:]
+            return prefix, algo_name
+            
+    parts = clean_name.split('_')
+    if len(parts) > 1:
+        return parts[0], '_'.join(parts[1:])
+    
+    return 'unknown_test', clean_name
 
-    # Если в текущей папке есть файлы с данными, значит это папка с тестами
-    if data_files:
-        folder_name = os.path.basename(root) # Имя папки с тестами (например, big_tests)
-        parent_dir = os.path.dirname(root)   # Родительская папка (например, part_4)
+def load_data(file_path):
+    try:
+        df = pd.read_csv(file_path, sep=r'\s+', names=['size', 'time'], engine='python')
+        df = df.dropna()
+        df['size'] = pd.to_numeric(df['size'])
+        df['time'] = pd.to_numeric(df['time'])
+        df = df.sort_values(by='size')
+        return df
+    except Exception as e:
+        print(f"  [!] Ошибка чтения файла {os.path.basename(file_path)}: {e}")
+        return None
+
+def create_group_plot(part_name, test_type, algos_data):
+    plt.figure(figsize=(12, 7))
+    plt.style.use('seaborn-v0_8-whitegrid') 
+    
+    for algo_name, df in algos_data.items():
+        plt.plot(df['size'], df['time'], marker='o', markersize=4, label=algo_name, linewidth=2)
+
+    pretty_test_type = test_type.replace('_', ' ').title()
+    plt.title(f'Сравнение производительности ({part_name}) - {pretty_test_type}', fontsize=14, pad=20)
+    plt.xlabel('Размер массива (n)', fontsize=12)
+    plt.ylabel('Время выполнения (сек)', fontsize=12)
+    
+    plt.grid(True, which="both", ls="-", alpha=0.5)
+    plt.legend(title="Алгоритмы", bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    plt.tight_layout()
+
+    save_path = os.path.join(TARGET_DIR, part_name)
+    os.makedirs(save_path, exist_ok=True)
+    
+    file_name = f"{test_type}_comparison.png"
+    full_save_path = os.path.join(save_path, file_name)
+    
+    plt.savefig(full_save_path, dpi=300)
+    plt.close()
+    print(f"  [+] График сохранен: {full_save_path}")
+
+def main():
+    print(f"=== Запуск построения графиков из {SOURCE_DIR} ===")
+    
+    if not os.path.exists(SOURCE_DIR):
+        print(f"Ошибка: Директория с данными '{SOURCE_DIR}' не найдена.")
+        return
+
+    part_dirs = [d for d in os.listdir(SOURCE_DIR) if os.path.isdir(os.path.join(SOURCE_DIR, d))]
+    
+    if not part_dirs:
+        print("В папке 'time_res' не найдено подпапок с данными (part_N).")
+        return
+
+    for part in part_dirs:
+        part_path = os.path.join(SOURCE_DIR, part)
+        print(f"\nОбработка {part}...")
         
-        plt.figure(figsize=(10, 6))
-        has_data = False
+        grouped_data = {}
+        files = glob.glob(os.path.join(part_path, f"*{FILE_EXT}"))
         
-        # Узнаем шаг для текущей папки, по умолчанию 1
-        current_step = steps.get(folder_name, 1)
+        if not files:
+            print(f"  [-] В {part} нет файлов .txt")
+            continue
 
-        # Читаем все файлы с тестами внутри этой папки
-        for file_name in data_files:
-            file_path = os.path.join(root, file_name)
-            times = []
+        for file_path in files:
+            filename = os.path.basename(file_path)
+            test_type, algo_name = parse_filename(filename)
+            df = load_data(file_path)
             
-            with open(file_path, 'r') as f:
-                for line in f:
-                    try:
-                        times.append(float(line.strip()))
-                    except ValueError:
-                        pass # Скипаем мусор
-            
-            if times:
-                x_axis = [i * current_step for i in range(len(times))]
-                plt.plot(x_axis, times, label=file_name, marker='.', markersize=5, linewidth=2)
-                has_data = True
+            if df is not None:
+                if test_type not in grouped_data:
+                    grouped_data[test_type] = {}
+                grouped_data[test_type][algo_name] = df
 
-        # Если данные успешно считались, рисуем и сохраняем
-        if has_data:
-            plt.title(f"Сравнение сортировок: {folder_name}", fontsize=14, fontweight='bold')
-            plt.xlabel("Количество элементов (N)", fontsize=12)
-            plt.ylabel("Время выполнения (секунды)", fontsize=12)
-            
-            plt.legend()
-            plt.grid(True, linestyle='--', alpha=0.7)
+        if not grouped_data:
+            print(f"  [-] Не удалось собрать данные для графиков в {part}")
+            continue
 
-            # Формируем путь для сохранения: родительская папка + имя_папки_graph.png
-            save_name = f"{folder_name}_graph.png"
-            save_path = os.path.join(parent_dir, save_name)
-            
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            print(f"График сохранен: {save_path} kek")
+        for test_type, algos_data in grouped_data.items():
+            if len(algos_data) < 1:
+                print(f"  [-] Пропуск {test_type} (мало данных)")
+                continue
+            create_group_plot(part, test_type, algos_data)
 
-        plt.close() # Очищаем холст, чтобы графики не накладывались друг на друга
+    print("\n=== Все графики построены! ===")
+
+if __name__ == "__main__":
+    main()

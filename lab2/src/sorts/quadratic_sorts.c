@@ -83,37 +83,31 @@ void selection_sort (unsigned* arr, size_t size)
     return;
 }
 
-void shell_sort(unsigned* arr, size_t size) 
+void shell_sort (unsigned *arr, size_t size) 
 {
-    if (size < 2) 
-    {
-        return;
-    }
+    if (size < 2) return;
 
     size_t h = 1;
-    size_t max_step = 1;
-
-    while (max_step < size / 3) 
+    while (h < size / 3) 
     {
-        max_step = 3 * max_step + 1;
+        h = 3 * h + 1;
     }
 
     while (h >= 1) 
     {
         for (size_t cur = h; cur < size; cur++) 
         {
-            unsigned key = arr [cur];
-            int left = (int)cur - (int)h;
+            unsigned key = arr[cur];
+            int left = (int) cur - (int) h;
 
             while (left >= 0 && arr [left] > key) 
             {
                 arr [left + h] = arr [left];
-                left -= h;
+                left -= (int) h;
             }
             arr [left + h] = key;
         }
         
         h /= 3;
     }
-    return;
 }
