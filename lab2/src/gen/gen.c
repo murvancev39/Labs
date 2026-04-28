@@ -17,7 +17,7 @@ int main (int argc, char *argv [])
 
     if (max_val == RAND_MAX)
     {
-        for (unsigned i = 0; i <= size; i++)
+        for (unsigned i = 0; i < size; i++)
         {
             printf ("%u\n", rand ());
         }

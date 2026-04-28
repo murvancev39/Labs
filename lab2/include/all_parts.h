@@ -33,7 +33,7 @@ int run_part_4 (char res_dir_path [], char tests_dir_path []);
 int run_part_5 (char res_dir_path [], char tests_dir_path []);
 int run_part_10 (char res_dir_path [], char tests_dir_path []);
 int int_compare (const void *a, const void *b);
-void std_qsort (unsigned *arr, size_t size);
+int std_qsort (unsigned *arr, size_t size);
 
 
 #endif

@@ -13,10 +13,11 @@ int main (int argc, char *argv [])
         return 0;
     }
     unsigned *arr = (unsigned *) calloc (size, sizeof (unsigned));
+    if (!arr) return 1;
 
     for (unsigned i = 0; i < size; i++)
     {
-        scanf ("%u", arr + i);
+        if (!scanf ("%u", arr + i)) return 1;
     }
 
     qsort (arr, size, sizeof (unsigned), compare);
@@ -32,7 +33,5 @@ int main (int argc, char *argv [])
 
 int compare (const void *a, const void *b) 
 {
-    if (*(int *) a < *(int *) b) return -1;
-    if (*(int *) a == *(int *) b) return 0;
-    return 1;
+    return (*(unsigned *) a > *(unsigned *) b) - (*(unsigned *) a < *(unsigned *) b);
 }

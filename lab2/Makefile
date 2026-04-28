@@ -1,8 +1,13 @@
 # TODO проверка в мейке возврата кода файла 
 
-
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -Iinclude
+CFLAGS = -Wextra -Wunused-result -O3 -Iinclude
+# я вырубил -Wall так как он срабатывал на безопасном sprintf в тестере и выдавал варнинг, что может произойти переполнение, которого там быть не может
+PYTHON = python
+VENV_DIR = venv
+VENV_PYTHON = $(VENV_DIR)/Scripts/python.exe
+VENV_PIP = $(VENV_DIR)/Scripts/pip.exe
+VENV_DONE = $(VENV_DIR)/.venv_done
 
 SRC_DIR = src
 
@@ -88,12 +93,32 @@ $(RUN_TARGETS): run_%: $(PARTS_TARGET)
 
 run_all: $(RUN_TARGETS)
 
-plot:
-	python plotter.py
+# ===========================================================================
+# PYTHON VENV TARGETS
+# ===========================================================================
+
+$(VENV_DONE): requirements.txt
+	$(PYTHON) -m venv $(VENV_DIR)
+	@echo "Installing dependencies..."
+	$(VENV_PIP) install -r requirements.txt
+	@touch $(VENV_DONE)
+
+setup_venv: $(VENV_DONE)
+
+plot: $(VENV_DONE)
+	@echo "Running plotter in venv..."
+	$(VENV_PYTHON) plotter.py
+
+# ===========================================================================
+# CLEAN TARGETS
+# ===========================================================================
+
 
 clean_plot:
 	rm -rf plots
 
+clean_venv:
+	rm -rf $(VENV_DIR)
 
 clean_ob:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
@@ -104,5 +129,5 @@ clean_res:
 clean_tests:
 	rm -rf $(TEST_FILES_DIR)
 
-clean_all: clean_ob clean_res clean_tests
+clean_all: clean_ob clean_res clean_tests clean_venv
 

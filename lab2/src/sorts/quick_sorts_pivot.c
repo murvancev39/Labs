@@ -1,20 +1,10 @@
 #include "quick_sorts_pivot.h"
-// int main ()
-// {
-//     unsigned arr [10] = {1,4,64,6,4,2,4,6,9,7};
 
-//     quick_sort_hoar_med_3_rand (arr, 10);
-
-//     for (int i = 0; i < 10; i++)
-//     {
-//         printf ("%u\n", arr [i]);
-//     }
-//     return 0;
-// }
-
-
-void quick_sort_hoar_med_3_rand (unsigned *arr, size_t size)
+int quick_sort_hoar_med_3_rand (unsigned *arr, size_t size)
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
+
     while (size > 1) 
     {
         size_t p = partition_hoar_med_3_rand (arr, size);
@@ -30,6 +20,7 @@ void quick_sort_hoar_med_3_rand (unsigned *arr, size_t size)
         arr += (p + 1);
         size -= (p + 1);
     }
+    return 0;
 }
 
 size_t partition_hoar_med_3_rand (unsigned *arr, size_t size)
@@ -65,8 +56,10 @@ size_t partition_hoar_med_3_rand (unsigned *arr, size_t size)
 }
 
 
-void quick_sort_hoar_rand (unsigned *arr, size_t size) 
+int quick_sort_hoar_rand (unsigned *arr, size_t size) 
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
     while (size > 1) 
     {
         size_t p = partition_hoar_random (arr, size);
@@ -82,6 +75,7 @@ void quick_sort_hoar_rand (unsigned *arr, size_t size)
         arr += (p + 1);
         size -= (p + 1);
     }
+    return 0;
 }
 
 size_t partition_hoar_random (unsigned *arr, size_t size)
@@ -176,8 +170,11 @@ size_t get_median_of_three_random (unsigned* arr, size_t size)
     return val3;
 }
 
-void quick_sort_hoar_med_of_med (unsigned *arr, size_t size)
+int quick_sort_hoar_med_of_med (unsigned *arr, size_t size)
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
+
     while (size > 1) 
     {
         size_t p = partition_hoar_med_of_med (arr, size);
@@ -193,6 +190,7 @@ void quick_sort_hoar_med_of_med (unsigned *arr, size_t size)
         arr += (p + 1);
         size -= (p + 1);
     }
+    return 0;
 }
 
 size_t partition_hoar_med_of_med (unsigned *arr, size_t size)
@@ -228,8 +226,11 @@ size_t partition_hoar_med_of_med (unsigned *arr, size_t size)
 }
 
 
-void insertion_sort_for_median (unsigned* arr, size_t size)
+int insertion_sort_for_median (unsigned* arr, size_t size)
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
+
     for (size_t cur = 1; cur < size; cur++) 
     {
         unsigned key = arr [cur];
@@ -241,6 +242,7 @@ void insertion_sort_for_median (unsigned* arr, size_t size)
         }
         arr [left + 1] = key;
     }
+    return 0;
 }
 
 unsigned get_median_of_medians (unsigned* arr, size_t size)
@@ -334,8 +336,10 @@ size_t partition_hoar_med_of_three (unsigned *arr, size_t size)
 }
 
 
-void quick_sort_hoar_med_of_three (unsigned *arr, size_t size)
+int quick_sort_hoar_med_of_three (unsigned *arr, size_t size)
 {
+    if (!arr) return 0;
+
     while (size > 1) 
     {
         size_t p = partition_hoar_med_of_three (arr, size);
@@ -351,5 +355,6 @@ void quick_sort_hoar_med_of_three (unsigned *arr, size_t size)
         arr += (p + 1);
         size -= (p + 1);
     }
+    return 0;
 }
 

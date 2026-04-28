@@ -1,11 +1,9 @@
 #include "quadratic_sorts.h"
 
-void insertion_sort (unsigned* arr, size_t size)
+int insertion_sort (unsigned* arr, size_t size)
 {
-    if (size < 2) 
-    {
-        return;
-    }
+    if (size < 2) return 0;
+    if (!arr) return 0;
 
     for (size_t cur = 1; cur < size; cur++) 
     {
@@ -20,15 +18,13 @@ void insertion_sort (unsigned* arr, size_t size)
         }
         arr [left + 1] = key;
     }
-    return;
+    return 0;
 }
 
-void bubble_sort (unsigned* arr, size_t size) 
+int bubble_sort (unsigned* arr, size_t size) 
 {
-    if (size < 2) 
-    {
-        return;
-    }
+    if (size < 2) return 0;
+    if (!arr) return 0;
 
     for (size_t i = 0; i < size - 1; i++) 
     {
@@ -50,16 +46,14 @@ void bubble_sort (unsigned* arr, size_t size)
             break;
         }
     }
-    return;
+    return 0;
 }
 
 
-void selection_sort (unsigned* arr, size_t size) 
+int selection_sort (unsigned* arr, size_t size) 
 {
-    if (size < 2) 
-    {
-        return;
-    }
+    if (size < 2) return 0;
+    if (!arr) return 0;
 
     for (size_t i = 0; i < size - 1; i++) 
     {
@@ -80,12 +74,13 @@ void selection_sort (unsigned* arr, size_t size)
             arr [min_idx] = temp;
         }
     }
-    return;
+    return 0;
 }
 
-void shell_sort (unsigned *arr, size_t size) 
+int shell_sort (unsigned *arr, size_t size) 
 {
-    if (size < 2) return;
+    if (size < 2) return 0;
+    if (!arr) return 0;
 
     size_t h = 1;
     while (h < size / 3) 
@@ -110,4 +105,5 @@ void shell_sort (unsigned *arr, size_t size)
         
         h /= 3;
     }
+    return 0;
 }

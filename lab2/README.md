@@ -35,11 +35,12 @@ make gen_tests   # Генерация тестов
 make run_all     # Запуск тестирования всех партов в моем случае 1-5 и 10
 make run_part_N  # Запуск тестов для конкретного парта прим. run_part_1
 make plot        # Рисует графики
-make clean_all   # Полная очистка проекта
+make clean_all   # Полная очистка проекта, кроме графиков
 make clean_ob    # Чистит бинарники и объектники
 make clean_res   # Чистит результаты времени партов
 make clean_tests # Чистит нагенеренные тесты
 make clean_plot  # Чистит графики
+make clean_venv  # Удаляет папку venv 
 ```
 
 ## Реализации

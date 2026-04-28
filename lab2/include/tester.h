@@ -1,8 +1,6 @@
 #ifndef TESTER_H
 #define TESTER_H
 
-#define MAX_PATH_LEN 64
-
 #include "testing.h"
 
 int write_test_result (const char *func_name, double *time_arr, const char *result_dir, unsigned size, unsigned step);

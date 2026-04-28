@@ -59,8 +59,11 @@ size_t partition_lomuto (unsigned *arr, size_t size)
     return i;
 }
 
-void quick_sort_hoar (unsigned *arr, size_t size) 
+int quick_sort_hoar (unsigned *arr, size_t size) 
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
+
     while (size > 1) 
     {
         size_t p = partition_hoar (arr, size);
@@ -76,10 +79,14 @@ void quick_sort_hoar (unsigned *arr, size_t size)
         arr += (p + 1);
         size -= (p + 1);
     }
+    return 0;
 }
 
-void quick_sort_lomuto (unsigned *arr, size_t size) 
+int quick_sort_lomuto (unsigned *arr, size_t size) 
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
+
     while (size > 1) 
     {
         size_t p = partition_lomuto (arr, size);
@@ -95,6 +102,7 @@ void quick_sort_lomuto (unsigned *arr, size_t size)
         arr += (p + 1);
         size -= (p + 1);
     }
+    return 0;
 }
 
 
@@ -139,8 +147,11 @@ Index partition_fat (unsigned *arr, size_t size)
     return res;
 }
 
-void quick_sort_fat (unsigned *arr, size_t size)
+int quick_sort_fat (unsigned *arr, size_t size)
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
+
     while (size > 1) 
     {
         Index p = partition_fat (arr, size);
@@ -159,4 +170,5 @@ void quick_sort_fat (unsigned *arr, size_t size)
         arr += right_part_start;
         size -= right_part_start;
     }
+    return 0;
 }

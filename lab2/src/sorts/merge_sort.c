@@ -41,10 +41,7 @@ void merge (unsigned *arr, unsigned *buffer, size_t left, size_t mid, size_t rig
 
 void merge_sort_recursive_internal (unsigned *arr, unsigned *buffer, size_t left, size_t right)
 {
-    if (right - left <= 1) 
-    {
-        return;
-    }
+    if (right - left <= 1) return;
 
     size_t mid = left + (right - left) / 2;
 
@@ -54,25 +51,24 @@ void merge_sort_recursive_internal (unsigned *arr, unsigned *buffer, size_t left
     merge (arr, buffer, left, mid, right);
 }
 
-void merge_sort_recursive (unsigned *arr, size_t n)
+int merge_sort_recursive (unsigned *arr, size_t n)
 {
-    if (n < 2) 
-    {
-        return;
-    }
+    if (n < 2) return 0;
+    if (!arr) return 0;
     unsigned *buffer = (unsigned *) malloc (n * sizeof (unsigned));
+    if (!buffer) return 1;
     merge_sort_recursive_internal (arr, buffer, 0, n);
     free (buffer);
+    return 0;
 }
 
-void merge_sort_iterative (unsigned *arr, size_t n)
+int merge_sort_iterative (unsigned *arr, size_t n)
 {
-    if (n < 2) 
-    {
-        return;
-    }
+    if (n < 2) return 0;
+    if (!arr) return 0;
 
     unsigned *buffer = (unsigned *) malloc (n * sizeof (unsigned));
+    if (!buffer) return 1;
 
     for (size_t size = 1; size < n; size *= 2) 
     {
@@ -89,6 +85,7 @@ void merge_sort_iterative (unsigned *arr, size_t n)
     }
 
     free (buffer);
+    return 0;
 }
 
 

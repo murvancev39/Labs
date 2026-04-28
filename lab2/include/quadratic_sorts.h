@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void insertion_sort (unsigned* arr, size_t size);
-void bubble_sort (unsigned* arr, size_t size);
-void selection_sort (unsigned* arr, size_t size);
-void shell_sort(unsigned* arr, size_t size);
+int insertion_sort (unsigned* arr, size_t size);
+int bubble_sort (unsigned* arr, size_t size);
+int selection_sort (unsigned* arr, size_t size);
+int shell_sort(unsigned* arr, size_t size);
 
 #endif

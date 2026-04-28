@@ -4,10 +4,13 @@ int main (int argc, char *argv [])
 {
     if (argc < 4) return 0;
 
-    char tests_dir_path [32] = {};
-    char res_dir_path [32] = {};
-    strcpy (tests_dir_path, argv [1]);
-    strcpy (res_dir_path, argv [2]);
+    char tests_dir_path [MAX_PATH_LEN] = {};
+    char res_dir_path [MAX_PATH_LEN] = {};
+    if (strlen (argv [1]) > (MAX_PATH_LEN - 24)) return -1;
+    if (strlen (argv [2]) > (MAX_PATH_LEN - 24)) return -1; // 24 т.к 1 - \0 ==>
+    // ==>  23 - длина наибольшей строки которая будет присоединяться к лдному из путей
+    snprintf(tests_dir_path, MAX_PATH_LEN, "%s", argv[1]);
+    snprintf(res_dir_path, MAX_PATH_LEN, "%s", argv[2]);
     
     int part_1_flag  = 0;
     int part_2_flag  = 0;    
@@ -84,7 +87,7 @@ int run_part_1 (char res_dir_path [], char tests_dir_path [])
                                 interface [i].path_tests_to,
                                 interface [i].test_size,
                                 interface [i].test_step);
-        if (!indicator) return 1; //TODO проверка в мейке
+        if (indicator) return 1; //TODO проверка в мейке
         printf ("[SMALL TESTS] - COMPLETED : %s sort\n", interface [i].func_name);
     }
     
@@ -125,8 +128,7 @@ int run_part_2 (char res_dir_path [], char tests_dir_path [])
                                 big_tests_interface [i].path_tests_to,
                                 big_tests_interface [i].test_size,
                                 big_tests_interface [i].test_step);
-        // printf ("\n\nEBLAN\n\n");
-        if (!indicator) return 1;
+        if (indicator) return 1;
 
         printf ("[BIG TESTS] - COMPLETED : %s sort\n", big_tests_interface [i].func_name);
     }
@@ -161,7 +163,7 @@ int run_part_3 (char res_dir_path [], char tests_dir_path [])
                                 merge_tests_interface [i].test_size,
                                 merge_tests_interface [i].test_step);
         
-        if (!indicator) return 1;
+        if (indicator) return 1;
 
         printf ("[BIG TESTS] - COMPLETED : %s sort\n", merge_tests_interface [i].func_name);
     }
@@ -197,7 +199,7 @@ int run_part_4 (char res_dir_path [], char tests_dir_path [])
                                 quick_tests_interface [i].test_size,
                                 quick_tests_interface [i].test_step);
         
-        if (!indicator) return 1;
+        if (indicator) return 1;
 
         printf ("[BIG TESTS] - COMPLETED : %s sort\n", quick_tests_interface [i].func_name);
     }
@@ -229,7 +231,7 @@ int run_part_4 (char res_dir_path [], char tests_dir_path [])
                                 quick_dublicates_interface [i].test_size,
                                 quick_dublicates_interface [i].test_step);
         
-        if (!indicator) return 1;
+        if (indicator) return 1;
 
         printf ("[MOST DUBLICATES TESTS] - COMPLETED : %s sort\n", quick_dublicates_interface [i].func_name);
     }
@@ -268,7 +270,7 @@ int run_part_5 (char res_dir_path [], char tests_dir_path [])
                                 hoar_pivots_interface [i].test_size,
                                 hoar_pivots_interface [i].test_step);
         
-        if (!indicator) return 1;
+        if (indicator) return 1;
 
         printf ("[BIG TESTS] - COMPLETED : %s sort\n", hoar_pivots_interface [i].func_name);
     }
@@ -305,7 +307,7 @@ int run_part_10 (char res_dir_path [], char tests_dir_path [])
                                 mixed_tests_interface [i].test_size,
                                 mixed_tests_interface [i].test_step);
         
-        if (!indicator) return 1;
+        if (indicator) return 1;
 
         printf ("[BIG TESTS] - COMPLETED : %s sort\n", mixed_tests_interface [i].func_name);
     }
@@ -316,12 +318,14 @@ int run_part_10 (char res_dir_path [], char tests_dir_path [])
 
 int int_compare (const void *a, const void *b) 
 {
-    if (*(unsigned *) a < *(unsigned *) b) return -1;
-    if (*(unsigned *) a == *(unsigned *) b) return 0;
-    return 1;
+    return (*(unsigned *) a > *(unsigned *) b) - (*(unsigned *) a < *(unsigned *) b);
 }
 
-void std_qsort (unsigned *arr, size_t size)
+int std_qsort (unsigned *arr, size_t size)
 {
+    if (size < 2) return 0;
+    if (!arr) return 0;
+
     qsort (arr, size, sizeof (unsigned), int_compare);
+    return 0;
 }
