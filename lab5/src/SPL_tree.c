@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Node
+typedef struct SPL_Node
 {
     unsigned key;
-    struct Node *left;
-    struct Node *right;
-    struct Node *dad;
-} node_t;
+    struct SPL_Node *left;
+    struct SPL_Node *right;
+    struct SPL_Node *dad;
+} SPL_node_t;
 
 typedef enum Side 
 {
@@ -17,12 +17,19 @@ typedef enum Side
     Right = 1,
 } side;
 
-void rotate_splay (node_t **root, node_t *node)
+void SPL_rotate (SPL_node_t **root, SPL_node_t *node);
+void splay (SPL_node_t **root, SPL_node_t *node);
+int SPL_search (SPL_node_t **root, unsigned key);
+void SPL_add (SPL_node_t **root, unsigned key);
+void SPL_delete (SPL_node_t **root, unsigned key);
+SPL_node_t *SPL_max_node (SPL_node_t **root);
+
+void SPL_rotate (SPL_node_t **root, SPL_node_t *node)
 {
     if (!node) return;
     if (!node->dad) return;
-    node_t *dod = node->dad;
-    node_t *pradod = dod->dad;
+    SPL_node_t *dod = node->dad;
+    SPL_node_t *pradod = dod->dad;
 
     if (node == dod->left)
     {
@@ -52,16 +59,15 @@ void rotate_splay (node_t **root, node_t *node)
     }
 }
 
-
-void splay (node_t **root, node_t *node)
+void splay (SPL_node_t **root, SPL_node_t *node)
 {
     if (!root) return;
     if (!(*root)) return;
     if (!node) return;
     if (!node->dad) return;
-    node_t *cur_node = node;
-    node_t *dod = cur_node->dad;
-    node_t *pradod = NULL;
+    SPL_node_t *cur_node = node;
+    SPL_node_t *dod = cur_node->dad;
+    SPL_node_t *pradod = NULL;
 
     while (dod)
     {
@@ -89,11 +95,11 @@ void splay (node_t **root, node_t *node)
     
 }
 
-int search_splay (node_t **root, unsigned key)
+int SPL_search (SPL_node_t **root, unsigned key)
 {
     if (!root) return 0;
-    node_t *node = *root;
-    node_t *prev = node;
+    SPL_node_t *node = *root;
+    SPL_node_t *prev = node;
 
     while (node)
     {
@@ -118,11 +124,11 @@ int search_splay (node_t **root, unsigned key)
     return 0;
 }
 
-void add_splay (node_t **root, unsigned key)
+void SPL_add (SPL_node_t **root, unsigned key)
 {
     if (!root) return;
-    node_t *node = *root;
-    node_t *prev = node;
+    SPL_node_t *node = *root;
+    SPL_node_t *prev = node;
     side which_side = Root;
 
     while (node)
@@ -147,7 +153,7 @@ void add_splay (node_t **root, unsigned key)
         }
     }
     
-    node_t *new_node = (node_t *) calloc (1, sizeof (node_t));
+    SPL_node_t *new_node = (SPL_node_t *) calloc (1, sizeof (SPL_node_t));
     new_node->key = key;
     if (which_side == Root)
     {
@@ -168,13 +174,13 @@ void add_splay (node_t **root, unsigned key)
     return;
 }
 
-void delete_splay (node_t **root, unsigned key)
+void SPL_delete (SPL_node_t **root, unsigned key)
 {
     if (!root) return;
     if (!(*root)) return;
-    if (!search_splay (root, key)) return;
-    node_t *R = (*root)->right;
-    node_t *L = (*root)->left;
+    if (!SPL_search (root, key)) return;
+    SPL_node_t *R = (*root)->right;
+    SPL_node_t *L = (*root)->left;
     free (*root);
     if (!L)
     {
@@ -182,7 +188,7 @@ void delete_splay (node_t **root, unsigned key)
         if (R) R->dad = NULL;
         return;
     }
-    node_t *max_node = max_node_splay (&L);
+    SPL_node_t *max_node = SPL_max_node (&L);
     splay (&L, max_node);
     L->right = R;
     if (R) R->dad = L;
@@ -191,10 +197,10 @@ void delete_splay (node_t **root, unsigned key)
     return;
 }
 
-node_t *max_node_splay (node_t **root)
+SPL_node_t *SPL_max_node (SPL_node_t **root)
 {
-    node_t *node = *root;
-    node_t *prev = NULL;
+    SPL_node_t *node = *root;
+    SPL_node_t *prev = NULL;
     while (node)
     {
         prev = node;
