@@ -1,20 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-typedef struct B_Node_t
-{
-    int leaf;
-    int count;
-    unsigned *key_arr;
-    struct B_Node_t **children_arr;
-} B_node_t;
-
-typedef struct B_Tree_t
-{
-    unsigned degree;
-    B_node_t *root;
-} B_tree_t;
+#include "B_tree.h"
 
 void B_free_node (B_node_t *node)
 {
