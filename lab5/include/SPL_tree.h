@@ -8,23 +8,31 @@
 typedef struct SPL_Node
 {
     unsigned key;
+    struct SPL_Node *dad;
     struct SPL_Node *left;
     struct SPL_Node *right;
-    struct SPL_Node *dad;
 } SPL_node_t;
 
-typedef enum Side 
+typedef struct SPL_Tree_t
 {
-    Root = -1,
+    unsigned count;
+    SPL_node_t *root;
+} SPL_tree_t;
+
+typedef enum SPL_Side 
+{
     Left = 0,
     Right = 1,
-} side;
+    Root = -1,
+} SPL_side;
 
-void SPL_rotate (SPL_node_t **root, SPL_node_t *node);
-void splay (SPL_node_t **root, SPL_node_t *node);
-int SPL_search (SPL_node_t **root, unsigned key);
-void SPL_add (SPL_node_t **root, unsigned key);
-void SPL_delete (SPL_node_t **root, unsigned key);
-SPL_node_t *SPL_max_node (SPL_node_t **root);
-
+void       *SPL_ctr_tree      ();
+void        SPL_destroy_nodes (SPL_node_t *node);
+void        SPL_destructor    (void *tree_v);
+SPL_node_t *SPL_max_node      (SPL_node_t *node);
+int         SPL_search        (SPL_tree_t *tree, unsigned key);
+int         SPL_add           (void *tree_v, unsigned key);
+int         SPL_delete        (void *tree_v, unsigned key);
+void        splay             (SPL_tree_t *tree, SPL_node_t *node);
+void        SPL_rotate        (SPL_tree_t *tree, SPL_node_t *node);
 #endif
