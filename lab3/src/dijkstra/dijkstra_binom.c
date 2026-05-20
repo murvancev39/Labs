@@ -3,6 +3,7 @@
 binom_heap **idx_arr_init (size_t size)
 {
     binom_heap **idx_arr = (binom_heap **) malloc (size * sizeof (*idx_arr));
+    if (!idx_arr) return NULL; 
     for (size_t i = 0; i < size; i++)
     {
         idx_arr [i] = NOT_IN_HEAP;
@@ -10,11 +11,11 @@ binom_heap **idx_arr_init (size_t size)
     return idx_arr;
 }
 
-unsigned get_min (binom_heap *heap)
+void *get_min (binom_heap *heap)
 {
     if (heap == NULL || heap->child == NULL)
     {
-        return -1488;
+        return NULL;
     }
 
     binom_heap *cur = heap->child;
@@ -22,7 +23,7 @@ unsigned get_min (binom_heap *heap)
 
     while (cur != NULL)
     {
-        if (cur->key < min_node->key || (cur->key == min_node->key && cur->ins_idx < min_node->ins_idx))
+        if (heap->cmp (cur->key, min_node->key) < 0 || (heap->cmp (cur->key, min_node->key) == 0 && cur->ins_idx < min_node->ins_idx))
         {
             min_node = cur;
         }
@@ -50,6 +51,7 @@ void destroy_heap (binom_heap *heap)
 
     destroy_node(heap->child);
     heap->child = NULL;
+    
     return;
 }
 
@@ -102,9 +104,12 @@ binom_heap* merge_lists (binom_heap *l1, binom_heap *l2)
     return head;
 }
 
-void insert (binom_heap *heap, int val, int idx, binom_heap **idx_arr)
+void insert (binom_heap *heap, void *val, int idx, binom_heap **idx_arr)
 {
+    if (!heap || !idx_arr) return;
     binom_heap *node = (binom_heap *) calloc (1, sizeof (binom_heap));
+    if (!node) return;
+    node->cmp = heap->cmp;
     node->key = val;
     node->bro = heap->child;
     node->degree = 0;
@@ -117,6 +122,7 @@ void insert (binom_heap *heap, int val, int idx, binom_heap **idx_arr)
 
 void merge (binom_heap *heap)
 {
+    if (!heap) return;
     if (heap->child == NULL) return;
 
     binom_heap *prev = NULL;
@@ -130,7 +136,7 @@ void merge (binom_heap *heap)
             prev = cur;
             cur = next;
         }
-        else if (cur->key < next->key)
+        else if (heap->cmp (cur->key, next->key) < 0)
         {// cur остается крнем, next уходит под него
             cur->bro = next->bro;
             link_tree (next, cur);
@@ -154,6 +160,7 @@ void merge (binom_heap *heap)
 
 void link_tree (binom_heap *from, binom_heap *where)
 {
+    if (!from || !where) return;
     from->parent = where;
     from->bro = where->child;
     where->child = from;
@@ -163,10 +170,8 @@ void link_tree (binom_heap *from, binom_heap *where)
 
 int extract_min(binom_heap *heap)
 {
-    if (heap->child == NULL) 
-    {
-    return -1;
-    }
+    if (!heap) return -1;
+    if (heap->child == NULL) return -1;
 
     binom_heap *min_node = heap->child;
     binom_heap *prev_min = NULL;
@@ -176,7 +181,7 @@ int extract_min(binom_heap *heap)
     
     while (cur != NULL) 
     {
-        if (cur->key < min_node->key || (cur->key == min_node->key && cur->ins_idx < min_node->ins_idx)) 
+        if (heap->cmp (cur->key, min_node->key) < 0 || (heap->cmp (cur->key, min_node->key) == 0 && cur->ins_idx < min_node->ins_idx)) 
         {
             min_node = cur;
             prev_min = prev;
@@ -201,11 +206,14 @@ int extract_min(binom_heap *heap)
     int ins_idx = min_node->ins_idx;
     free (min_node);
     return ins_idx;
+
 }
+
 
 
 binom_heap* reverse_list (binom_heap *root)
 {
+    if (!root) return NULL;
     binom_heap *prev = NULL;
     binom_heap *curr = root;
     binom_heap *next = NULL;
@@ -225,79 +233,136 @@ binom_heap* reverse_list (binom_heap *root)
 
 void sift_up (binom_heap *node, binom_heap **idx_arr)
 {
-    while (node->parent != NULL && (node->key < node->parent->key || 
-          (node->key == node->parent->key && node->ins_idx < node->parent->ins_idx)))
+    if (!node || !idx_arr) return;
+    while (node->parent != NULL && (node->cmp (node->key, node->parent->key) < 0 || 
+          (node->cmp (node->key, node->parent->key) == 0 && node->ins_idx < node->parent->ins_idx)))
     {
-        int temp_key = node->key;
+        void *temp_key = node->key;
         int temp_idx = node->ins_idx;
+        int parent_idx = node->parent->ins_idx;
         
         node->key = node->parent->key;
-        node->ins_idx = node->parent->ins_idx;
+        node->ins_idx = parent_idx;
         
         node->parent->key = temp_key;
         node->parent->ins_idx = temp_idx;
 
-        idx_arr[node->ins_idx] = node;
-        idx_arr[node->parent->ins_idx] = node->parent;
+        idx_arr[parent_idx] = node;
+        idx_arr[temp_idx] = node->parent;
 
         node = node->parent;
     }
 }
 
+void forced_sift_up (binom_heap *node, binom_heap **idx_arr)
+{
+    if (!node || !idx_arr) return;
+
+    while (node->parent != NULL)
+    {
+        void *temp_key = node->key;
+        int temp_idx = node->ins_idx;
+        int parent_idx = node->parent->ins_idx;
+        
+        node->key = node->parent->key;
+        node->ins_idx = parent_idx;
+        
+        node->parent->key = temp_key;
+        node->parent->ins_idx = temp_idx;
+
+        idx_arr[parent_idx] = node;
+        idx_arr[temp_idx] = node->parent;
+
+        node = node->parent;
+    }
+}
+
+
 void delete_node (binom_heap *node, binom_heap *heap, binom_heap **idx_arr)
 {
-    if (node == NULL) 
+    if (node == NULL || heap == NULL || heap->child == NULL) 
     {
         return;
     }
-    node->key = -2147483648;
-    sift_up(node, idx_arr);
-    extract_min(heap);
+
+    int original_idx = node->ins_idx;
+
+    forced_sift_up (node, idx_arr);
+
+    binom_heap *cur = heap->child;
+    binom_heap *prev = NULL;
+
+    while (cur != NULL && cur != node)
+    {
+        prev = cur;
+        cur = cur->bro;
+    }
+
+    if (cur == node)
+    {
+        if (prev == NULL) 
+        {
+            heap->child = node->bro;
+        }
+        else 
+        {
+            prev->bro = node->bro;
+        }
+
+        binom_heap *child_list = reverse_list(node->child);
+        
+        heap->child = merge_lists(heap->child, child_list);
+        
+        merge(heap);
+    }
+
+    if (idx_arr != NULL)
+    {
+        idx_arr [original_idx] = NULL;
+    }
+    
+    free(node);
 }
 
-void update_key (binom_heap *node, unsigned new_val, binom_heap **idx_arr, binom_heap *heap)
-{
-    if (node == NULL)
-    {
-        return;
-    }
 
-    unsigned old_val = node->key;
+void update_key (binom_heap *node, void *new_val, binom_heap **idx_arr, binom_heap *heap)
+{
+    if (!node || !new_val || !idx_arr || !heap) return;
+
+    void *old_val = node->key;
     int current_ins_idx = node->ins_idx;
 
-    if (new_val < old_val)
+    if (heap->cmp (new_val, old_val) <= 0)
     {
         node->key = new_val;
-        sift_up (node, idx_arr);
+        sift_up(node, idx_arr);
     }
-    else if (new_val > old_val)
+    else if (heap->cmp (new_val, old_val) > 0)
     {
-        delete_node (node, heap, idx_arr);
+        delete_node(node, heap, idx_arr);
         
-        insert (heap, new_val, current_ins_idx, idx_arr);
+        insert(heap, new_val, current_ins_idx, idx_arr);
     }
 }
 
-void dijkstra (Graph *graph, int start_node, unsigned *shortest_distances, binom_heap *heap, binom_heap **idx_arr)
+void dijkstra (graph_t *graph, int start_node, unsigned *shortest_distances, binom_heap *heap, binom_heap **idx_arr)
 {
+    if (!graph || !shortest_distances || !heap || !idx_arr) return;
+    
     for (int i = 0; i < graph->nodes_count; i++)
     {
         shortest_distances [i] = UINT_MAX;
         idx_arr [i] = NOT_IN_HEAP;
-        // printf ("tut");
     }
 
     shortest_distances [start_node] = 0;
-    insert (heap, 0, start_node, idx_arr);
-    // int i = 0;
+    insert (heap, shortest_distances + start_node, start_node, idx_arr);
     while (heap->child != NULL)
     {
         int min_node_idx =  extract_min (heap);
-        // printf ("%d! %d \n", i, min_node_idx);
-        // i++;
         idx_arr [min_node_idx] = VISITED;
 
-        Edge *edge = graph->nodes_arr [min_node_idx];
+        edge_t *edge = graph->nodes_arr [min_node_idx];
         while (edge != NULL)
         {
             int idx = edge->idx;
@@ -311,11 +376,11 @@ void dijkstra (Graph *graph, int start_node, unsigned *shortest_distances, binom
 
                 if (idx_arr [idx] == NOT_IN_HEAP)
                 {
-                    insert (heap, shortest_distances [idx], idx, idx_arr);
+                    insert (heap, shortest_distances + idx, idx, idx_arr);
                 }
                 else
                 {
-                    update_key (idx_arr [idx], shortest_distances [idx], idx_arr, heap);
+                    update_key (idx_arr [idx], shortest_distances + idx, idx_arr, heap);
                 }
             }
             edge = edge->next;

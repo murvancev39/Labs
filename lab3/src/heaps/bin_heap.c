@@ -1,26 +1,30 @@
 #include "bin_heap.h"
 
-unsigned *build_linear (unsigned *arr, size_t size)
+void **build_linear (void **arr, size_t size, int (*cmp) (void *, void *))
 {
+    if (!arr || !cmp) return NULL;
     Heap heap = {};
 
+    heap.cmp = cmp;
     heap.arr = arr;
     heap.capacity = size;
     heap.size = size;
-    int cur_idx = (size / 2) - 1;
+    int cur_idx = ((int) size / 2) - 1;
 
     for (; cur_idx >= 0; cur_idx--)
     {
-        bottom_up_sift_down (&heap, cur_idx);
+        bottom_up_sift_down (&heap, (size_t) cur_idx);
     }
 
     return heap.arr;
 }
 
-unsigned *build_insertion (unsigned *arr, size_t size)
+void **build_insertion (void **arr, size_t size, int (*cmp) (void *, void *))
 {
+    if (!arr || !cmp) return NULL;
     Heap heap = {};
 
+    heap.cmp = cmp;
     heap.arr = arr;
     heap.capacity = size;
     heap.size = size;
@@ -34,15 +38,20 @@ unsigned *build_insertion (unsigned *arr, size_t size)
 }
 
 
-void insert (Heap *heap, unsigned x)
+void insert (Heap *heap, void *x)
 {
+    if (!heap) return;
     if (heap->size >= heap->capacity)
     {
         heap->capacity *= 2;
-        heap->arr = (unsigned *) realloc (heap->arr, heap->capacity * sizeof (unsigned));
+        void **new_arr = (void **) realloc (heap->arr, heap->capacity * sizeof (void *));
+        if (!new_arr) return;
+        heap->arr = new_arr;
+        
     }
     heap->arr [heap->size] = x;
     sift_up (heap, heap->size);
+    
     heap->size++;
     
     return ;
@@ -50,16 +59,17 @@ void insert (Heap *heap, unsigned x)
 
 void sift_up (Heap* heap, size_t idx)
 {
-    unsigned cur_val = heap->arr [idx];
+    if (!heap) return;
+    void *cur_val = heap->arr [idx];
     size_t dad = 0;
-    unsigned dad_val = 0;
+    void *dad_val = 0;
 
     while (idx != 0)
     {
         dad = (idx - 1) / 2;
         dad_val = heap->arr [dad];
 
-        if (dad_val > cur_val)
+        if (heap->cmp(dad_val, cur_val) > 0)
         {
             heap->arr [idx] = dad_val;
             idx = dad;
@@ -75,53 +85,46 @@ void sift_up (Heap* heap, size_t idx)
 
 void bottom_up_sift_down (Heap *heap, size_t idx)
 {
-    if (idx >= heap->size)
-    {
-        return;
-    }
+    if (!heap) return;
+    if (idx >= heap->size) return;
 
-    size_t left = idx * 2 + 1;
-    size_t right = idx * 2 + 2;
     size_t dad = idx;
-    unsigned dad_val = heap->arr [dad];
-    unsigned left_val = 0;
-    unsigned right_val = 0;
+    void *dad_val = heap->arr [dad];
 
-
-    while (right < heap->size)
-    {    
-        left_val = heap->arr [left];
-        right_val = heap->arr [right];
-        if (left_val < right_val)
-        {
-            heap->arr [dad] = left_val;
-            dad = left;
-        }
-        else
-        {
-            heap->arr [dad] = right_val;
-            dad = right;
-        }
-        left = dad * 2 + 1;
-        right = dad * 2 + 2;
-    }
-
-    if (left < heap->size)
+    while (dad * 2 + 1 < heap->size)
     {
-        heap->arr [dad] = heap->arr [left];
-        dad = left;
+        size_t left = get_left_child (dad);
+        size_t right = get_right_child (dad);
+        size_t child = left;
+
+        if (right < heap->size && heap->cmp (heap->arr [right], heap->arr [left]) < 0)
+        {
+            child = right;
+        }
+
+        heap->arr [dad] = heap->arr [child];
+        dad = child;
     }
 
     heap->arr [dad] = dad_val;
 
     sift_up (heap, dad);
-    return;
 }
 
+size_t get_left_child (size_t dad)
+{
+    return dad * 2 + 1;
+}
+
+size_t get_right_child (size_t dad)
+{
+    return dad * 2 + 2;
+}
 
 void swap (Heap *heap, size_t i, size_t j)
 {
-    unsigned swap_val = heap->arr [i];
+    if (!heap) return;
+    void *swap_val = heap->arr [i];
     heap->arr [i] = heap->arr [j];
     heap->arr [j] =  swap_val;
 }

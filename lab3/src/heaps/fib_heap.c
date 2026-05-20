@@ -3,6 +3,7 @@
 fib_node **idx_arr_init (size_t size)
 {
     fib_node **idx_arr = (fib_node **) malloc (size * sizeof (*idx_arr));
+    if (!idx_arr) return NULL;
     for (size_t i = 0; i < size; i++)
     {
         idx_arr [i] = NOT_IN_HEAP;
@@ -37,11 +38,13 @@ void destruct_nodes (fib_node *node)
 
 unsigned get_min (fib_heap *heap)
 {
+    if (!heap) return 0;
     return heap->min->elem;
 }
 
 void merge_lists (fib_node *node_1, fib_node *node_2)
 {
+    if (!node_1 || !node_2) return;
     fib_node *last_node_2 = node_2->left_bro;
     fib_node *second_node_1 = node_1->right_bro;
     node_1->right_bro = node_2;
@@ -52,7 +55,7 @@ void merge_lists (fib_node *node_1, fib_node *node_2)
 
 void merge_heaps (fib_heap *heap_1, fib_heap *heap_2)
 {
-    // printf ("merge_heaps {h1 %d|h2 %d}\n", heap_1->n, heap_2->n);
+    if (!heap_1 || !heap_2) return;
     if (heap_1->min == NULL)
     {
         heap_1->min = heap_2->min;
@@ -127,6 +130,7 @@ fib_node *link (fib_node *node_1, fib_node *node_2)
 
 void fill_heap_by_nodes_arr (fib_heap *heap, fib_node **fib_arr, unsigned len)
 {
+    if (!heap || !fib_arr) return;
     unsigned i = 0;
     while (fib_arr [i] == NULL)
     {
@@ -230,11 +234,8 @@ void consolidate (fib_heap *heap)
 }
 
 int extract_min (fib_heap *heap, fib_node **idx_arr)
-{// овзвращает индекс
-    if (heap->min == NULL)
-    {
-        return -1;
-    }
+{// возвращает индекс
+    if (!heap || !idx_arr || !heap->min) return -1;
 
     fib_heap second_heap = {};
     second_heap.min = heap->min->child;
@@ -243,7 +244,6 @@ int extract_min (fib_heap *heap, fib_node **idx_arr)
     {
         do
         {
-            // printf ("\n!!!");
             node->parent = NULL;
             node = node->right_bro;
         } while (node != second_heap.min);
@@ -282,10 +282,11 @@ int extract_min (fib_heap *heap, fib_node **idx_arr)
 
 fib_node *insert_val (fib_heap *heap, unsigned val, int dijkstra_id)
 {
-    assert (heap);
+    if (!heap) return NULL;
 
     fib_heap second_heap = {};
     fib_node *node = (fib_node *) calloc (1, sizeof (fib_node));
+    if (!node) return NULL;
     node->child = NULL;
     node->degree = 0;
     node->elem = val;
@@ -305,8 +306,7 @@ fib_node *insert_val (fib_heap *heap, unsigned val, int dijkstra_id)
 
 void insert_node (fib_heap *heap, fib_node *new_node)
 {
-    assert (heap);
-    assert (new_node);
+    if (!heap || !new_node) return;
     new_node->son_is_dead = no;
     new_node->parent = NULL;
     
@@ -330,6 +330,7 @@ void insert_node (fib_heap *heap, fib_node *new_node)
 
 void new_lower_key (fib_heap *heap, fib_node *node, unsigned val)
 {
+    if (!heap || !node) return;
     fib_node *parent = node->parent;
     node->elem = val;
     if (parent == NULL)
@@ -357,28 +358,29 @@ void new_lower_key (fib_heap *heap, fib_node *node, unsigned val)
 }
 
 void cut (fib_node *node)
-{// тут parent не NULL всегда
+{
     fib_node *parent = node->parent;
-    if (parent->child == node)
+
+    if (node->right_bro == node)
     {
-        parent->child = node->right_bro;
+        parent->child = NULL;
+    }
+    else
+    {
+        node->left_bro->right_bro = node->right_bro;
+        node->right_bro->left_bro = node->left_bro;
+        if (parent->child == node)
+        {
+            parent->child = node->right_bro;
+        }
     }
 
-    node->left_bro->right_bro = node->right_bro;
-    node->right_bro->left_bro = node->left_bro;
     node->left_bro = node;
     node->right_bro = node;
     node->parent = NULL;
 
-    if (parent->child == node)
-    {
-        parent->child = NULL;
-    }
-
     parent->degree--;
-    return;
 }
-
 void cut_rec (fib_heap *heap, fib_node *node)
 {
     if (node == NULL)
@@ -403,8 +405,9 @@ void cut_rec (fib_heap *heap, fib_node *node)
     return;
 }
 
-void dijkstra (Graph *graph, int start_node, unsigned *shortest_distances, fib_heap *heap, fib_node **idx_arr)
+void dijkstra (graph_t *graph, int start_node, unsigned *shortest_distances, fib_heap *heap, fib_node **idx_arr)
 {
+    if (!graph || !shortest_distances || !heap || !idx_arr) return;
     for (int i = 0; i < graph->nodes_count; i++)
     {
         shortest_distances [i] = UINT_MAX;
@@ -413,17 +416,13 @@ void dijkstra (Graph *graph, int start_node, unsigned *shortest_distances, fib_h
     
     shortest_distances [start_node] = 0;
     idx_arr [start_node] = insert_val (heap, 0, start_node);
-    // int i = 0;
 
     while (heap->min != NULL)
     {
         int min_node_idx =  extract_min (heap, idx_arr);
-        // assert (min_node_idx != -1);
-        // printf ("%d\n", i);
-        // i++;
         idx_arr [min_node_idx] = VISITED;
 
-        Edge *edge = graph->nodes_arr [min_node_idx];
+        edge_t *edge = graph->nodes_arr [min_node_idx];
         while (edge != NULL)
         {
             int idx = edge->idx;

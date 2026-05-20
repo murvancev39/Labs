@@ -13,7 +13,7 @@
 
 typedef struct
 {
-    unsigned val;
+    void *val;
     unsigned idx;
 } bin_node;
 
@@ -24,18 +24,21 @@ struct heap
     unsigned *idx_arr;
     size_t capacity;
     size_t size;
+    int (*cmp) (void *, void *);
 };
 
 typedef struct heap Heap;
 
-void heap_init (Heap *heap, size_t size);
-void insert (Heap *heap, unsigned x, int idx);
+void heap_init (Heap *heap, size_t size, int (*cmp_t) (void *, void *));
+void insert (Heap *heap, void *x, int idx);
 void sift_up (Heap* heap, size_t idx);
 void bottom_up_sift_down (Heap *heap, size_t idx);
 void swap (Heap *heap, size_t i, size_t j);
 bin_node extract_min (Heap *heap);
-void dijkstra (Graph *graph, int start_node, unsigned *shortest_distances, Heap *heap);
-void new_lower_key (Heap *heap, int idx, unsigned new_val);
+void dijkstra (graph_t *graph, int start_node, unsigned *shortest_distances, Heap *heap);
+void new_lower_key (Heap *heap, int idx, void *new_val);
 
-
+size_t get_left_child (size_t dad);
+size_t get_right_child (size_t dad);
+int cmp (void *key_1, void *key_2);
 #endif

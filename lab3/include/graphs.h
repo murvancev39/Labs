@@ -1,29 +1,29 @@
 #ifndef GRAPHS_H
 #define GRAPHS_H
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 
-typedef struct Edge 
+typedef struct Edge_t 
 {
     int idx;
     unsigned weight;
-    struct Edge *next;
-} Edge;
+    struct Edge_t *next;
+} edge_t;
 
-typedef struct Graph 
+typedef struct Graph_t 
 {
     int nodes_count;
     int edges_count;
-    Edge **nodes_arr;
-} Graph;
+    edge_t **nodes_arr;
+} graph_t;
 
-Graph* create_graph (int nodes_count);
-void add_edge (Graph *graph, int from, int to, unsigned weight);
-void free_graph (Graph *graph);
-void generate_random_graph (Graph *graph, int num_edges, unsigned max_weight);
+void     free_graph            (graph_t *graph);
+graph_t *create_graph          (unsigned nodes_count);
+int      generate_random_graph (graph_t *graph, int num_edges, unsigned max_weight);
+int      add_edge              (graph_t *graph, unsigned from, unsigned to, unsigned weight);
 
 
 #endif

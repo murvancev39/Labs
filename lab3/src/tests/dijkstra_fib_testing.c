@@ -21,7 +21,7 @@ int main (int argc, char *argv[])
             time = 0;
             for (int z = 0; z < 5; z++)
             {
-                Graph *graph = create_graph (i);
+                graph_t *graph = create_graph (i);
                 generate_random_graph (graph, i * (i / 4), 1000000);
                 unsigned *shortest_distances = (unsigned *) malloc (sizeof (*shortest_distances) * i);
                 
@@ -55,7 +55,7 @@ int main (int argc, char *argv[])
             time = 0;
             for (int z = 0; z < 5; z++)
             {
-                Graph *graph = create_graph (i);
+                graph_t *graph = create_graph (i);
                 generate_random_graph (graph, i * 5, 1000000);
                 unsigned *shortest_distances = (unsigned *) malloc (sizeof (*shortest_distances) * i);
                 

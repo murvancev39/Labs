@@ -1,6 +1,8 @@
 #include "binom_dijkstra.h"
 #include <string.h>
 
+int cmp (void *key_1, void *key_2);
+
 int main (int argc, char *argv[])
 {    
     long long time = 0;
@@ -21,11 +23,12 @@ int main (int argc, char *argv[])
             time = 0;
             for (int z = 0; z < 5; z++)
             {
-                Graph *graph = create_graph (i);
+                graph_t *graph = create_graph (i);
                 generate_random_graph (graph, i * (i / 4), 1000000);
                 unsigned *shortest_distances = (unsigned *) malloc (sizeof (*shortest_distances) * i);
                 
                 binom_heap heap = {};
+                heap.cmp = cmp;
                 heap.child = NULL;
                 
                 size_t size = i;
@@ -55,11 +58,12 @@ int main (int argc, char *argv[])
             time = 0;
             for (int z = 0; z < 5; z++)
             {
-                Graph *graph = create_graph (i);
+                graph_t *graph = create_graph (i);
                 generate_random_graph (graph, i * 5, 1000000);
                 unsigned *shortest_distances = (unsigned *) malloc (sizeof (*shortest_distances) * i);
                 
                 binom_heap heap = {};
+                heap.cmp = cmp;
                 heap.child = NULL;
                 
                 size_t size = i;
@@ -81,5 +85,13 @@ int main (int argc, char *argv[])
             
         }
     }    
+    return 0;
+}
+
+
+int cmp (void *key_1, void *key_2)
+{
+    if (*(unsigned *) key_1 > *(unsigned *) key_2) return 1;
+    if (*(unsigned *) key_1 < *(unsigned *) key_2) return -1;
     return 0;
 }

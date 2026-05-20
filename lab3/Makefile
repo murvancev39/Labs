@@ -87,16 +87,10 @@ $(LOG_DIR)/%.log: $(BIN_DIR)/%.exe
 
 run_logs: run_dense run_sparse run_simple
 
-
-# $(LOG_DIR)/%.log: $(BIN_DIR)/%.exe
-# 	@mkdir -p $(LOG_DIR)
-# 	-@echo "Running $*..."
-# 	-./$< > $@
-
 plot: all
 	@mkdir -p $(PLT_DIR)
 	@echo "--- Plotting ---"
-	python plotter.py
+	python3 plotter.py
 
 
 clean:

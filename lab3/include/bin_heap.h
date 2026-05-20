@@ -8,18 +8,21 @@
 
 struct heap
 {
-    unsigned *arr;
+    void **arr;
     size_t capacity;
     size_t size;
+    int (*cmp) (void *, void *);
 };
 
 typedef struct heap Heap;
 
-unsigned *build_insertion (unsigned *arr, size_t size);
-unsigned *build_linear (unsigned *arr, size_t size);
-void insert (Heap *heap, unsigned x);
+void **build_insertion (void **arr, size_t size, int (*cmp) (void *, void *));
+void **build_linear (void **arr, size_t size, int (*cmp) (void *, void *));
+void insert (Heap *heap, void *x);
 void sift_up (Heap* heap, size_t idx);
 void bottom_up_sift_down (Heap *heap, size_t idx);
 void swap (Heap *heap, size_t i, size_t j);
 
+size_t get_left_child (size_t dad);
+size_t get_right_child (size_t dad);
 #endif

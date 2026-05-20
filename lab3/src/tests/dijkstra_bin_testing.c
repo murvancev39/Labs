@@ -1,5 +1,8 @@
 #include "bin_dijkstra.h"
 #include <string.h>
+#include <time.h>
+
+int cmp (void *key_1, void *key_2);
 
 int main (int argc, char *argv[])
 {    
@@ -22,14 +25,14 @@ int main (int argc, char *argv[])
             time = 0;
             for (int z = 0; z < 5; z++)
             {
-                Graph *graph = create_graph (i);
+                graph_t *graph = create_graph (i);
                 generate_random_graph (graph, i * (i / 4), 1000000);
                 unsigned *shortest_distances = (unsigned *) malloc (sizeof (*shortest_distances) * i);
                 
                 Heap heap = {};
                 heap.arr = NULL;
                 size_t size = i;
-                heap_init (&heap, size);            
+                heap_init (&heap, size, cmp);            
                 
                 time -= clock ();
                 dijkstra (graph, 0, shortest_distances, &heap);
@@ -54,14 +57,14 @@ int main (int argc, char *argv[])
             time = 0;
             for (int z = 0; z < 5; z++)
             {
-                Graph *graph = create_graph (i);
+                graph_t *graph = create_graph (i);
                 generate_random_graph (graph, i * 5, 1000000);
                 unsigned *shortest_distances = (unsigned *) malloc (sizeof (*shortest_distances) * i);
                 
                 Heap heap = {};
                 heap.arr = NULL;
                 size_t size = i;
-                heap_init (&heap, size);            
+                heap_init (&heap, size, cmp);            
                 
                 time -= clock ();
                 dijkstra (graph, 0, shortest_distances, &heap);
@@ -80,5 +83,12 @@ int main (int argc, char *argv[])
         }
     }
 
+    return 0;
+}
+
+int cmp (void *key_1, void *key_2)
+{
+    if (*(unsigned *) key_1 > *(unsigned *) key_2) return 1;
+    if (*(unsigned *) key_1 < *(unsigned *) key_2) return -1;
     return 0;
 }

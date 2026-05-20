@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
 
 #include <time.h>
 #include "graphs.h"
@@ -52,6 +53,6 @@ void insert_node (fib_heap *heap, fib_node *new_node);
 void cut (fib_node *node);
 void cut_rec (fib_heap *heap, fib_node *node);
 
-void dijkstra (Graph *graph, int start_node, unsigned *shortest_distances, fib_heap *heap, fib_node **idx_arr);
+void dijkstra (graph_t *graph, int start_node, unsigned *shortest_distances, fib_heap *heap, fib_node **idx_arr);
 
 #endif
