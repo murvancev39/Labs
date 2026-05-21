@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "err_def.h"
 
 unsigned hash_f_s_len (void *key);
 unsigned hash_f_s_sum (void *key);

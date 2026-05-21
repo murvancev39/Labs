@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "err_def.h"
 
 unsigned *unsigned_test_gen (size_t size);
 char **string_test_gen (size_t size);

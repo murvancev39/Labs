@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "err_def.h"
 
 typedef enum
 {
@@ -34,7 +35,7 @@ void chained_hash_table_clean (chained_hash_table_t *table);
 void chained_hash_table_dtr (chained_hash_table_t *table);
 void nodes_dtr (node_t *node);
 int chained_hash_table_add (chained_hash_table_t *table, void *key);
-void rehash (chained_hash_table_t *table, int (*add_func) (chained_hash_table_t *, void *));
+int rehash (chained_hash_table_t *table, int (*add_func) (chained_hash_table_t *, void *));
 int chained_hash_table_delete (chained_hash_table_t *table, void *key);
 int chained_hash_table_search (chained_hash_table_t *table, void *key);
 

@@ -1,37 +1,18 @@
 CC = gcc
 
-
-CFLAGS 
-
 INCLUDE_FLAG = -Iinclude
 
-DEBUG_CFLAGS = -std=c11 -D _DEBUG -ggdb3 -O0 -pie -fPIE \
-           -Wall -Wextra -Waggressive-loop-optimizations \
-           -Wmissing-declarations -Wcast-align -Wcast-qual \
-           -Wchar-subscripts -Wconditionally-supported -Wconversion \
-           -Wempty-body -Wfloat-equal -Wformat-nonliteral \
-           -Wformat-security -Wformat-signedness -Wformat=2 -Winline \
-           -Wlogical-op -Wopenmp-simd \
-           -Wpacked -Wpointer-arith -Winit-self -Wredundant-decls -Wshadow \
-           -Wsign-conversion -Wstrict-overflow=2 \
-           -Wsuggest-attribute=noreturn \
-           -Wswitch-default -Wswitch-enum -Wsync-nand \
-           -Wundef -Wunreachable-code -Wunused -Wuseless-cast -Wvariadic-macros \
-           -Wstack-protector -Werror=vla -Wlarger-than=8192 -Wstack-usage=8192 \
-           -Wno-literal-suffix -Wno-missing-field-initializers -Wno-narrowing \
-           -Wno-varargs
+DEBUG_CFLAGS = -std=c11 -D_DEBUG -ggdb3 -O0 \
+               -Wall -Wextra -Werror=vla \
+               -Wpointer-arith -Wshadow -Wconversion
 
 RELEASE_FLAGS = -O3 -flto -fstack-protector -fno-omit-frame-pointer -DNDEBUG
 
 CFLAGS = $(RELEASE_FLAGS) $(INCLUDE_FLAG) 
 
-LDFLAGS  = -flto-odr-type-merging -fno-omit-frame-pointer -fcheck-new \
-           -fsized-deallocation -fstack-protector -fstrict-overflow
+LDFLAGS  = -fno-omit-frame-pointer -fstack-protector -fstrict-overflow -lm
 
-SANITIZE = -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,\
-			float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,\
-			null,object-size,return,returns-nonnull-attribute,shift,\
-			signed-integer-overflow,undefined,unreachable,vla-bound,vptr
+SANITIZE = -fsanitize=address,leak,undefined
 
 
 OBJ_DIR = obj
@@ -41,18 +22,26 @@ RES_DIR = res
 PLOT_DIR = plots
 TESTS_DIR = tests
 
+
+PYTHON = python3
+VENV_DIR     = venv
+VENV_PIP     = $(VENV_DIR)/bin/pip
+VENV_PYTHON  = $(VENV_DIR)/bin/python3
+VENV_DONE    = $(VENV_DIR)/.venv_done
+
+
 SRC_FILES  = $(wildcard $(SRC_DIR)/*.c)
 TEST_FILES = $(wildcard $(TESTS_DIR)/*.c)
 
 OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_FILES)) \
-            $(patsubst $(TEST_DIR)/%.c, $(OBJ_DIR)/%.o, $(TEST_FILES))
+            $(patsubst $(TESTS_DIR)/%.c, $(OBJ_DIR)/%.o, $(TEST_FILES))
 
 TARGET = bin/tester.exe
 
 
 $(TARGET): $(OBJ_FILES)
 	@mkdir -p bin
-	$(CC) $(CFLAGS) $(OBJ_FILES) -o $(TARGET)
+	$(CC) $(CFLAGS) $(OBJ_FILES) $(LDFLAGS) -o $(TARGET)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -66,12 +55,13 @@ $(OBJ_DIR):
 $(RES_DIR):
 	mkdir -p $(RES_DIR)
 
---release: CFLAGS = $(RELEASE_FLAGS) $(INCLUDE_FLAG)
---release: clean_obj $(TARGET)
+release: CFLAGS = $(RELEASE_FLAGS) $(INCLUDE_FLAG)
+release: clean_obj $(TARGET)
 	@echo "Release build done."
 
---debug: CFLAGS = $(INCLUDE_FLAG) $(DEBUG_CFLAGS) $(SANITIZE) $(LDFLAGS)
---debug: clean_obj $(TARGET)
+debug: CFLAGS = $(INCLUDE_FLAG) $(DEBUG_CFLAGS) $(SANITIZE)
+debug: LDFLAGS += $(SANITIZE)
+debug: clean_obj $(TARGET)
 	@echo "Debug build done."
 
 part_1: $(TARGET)
@@ -92,13 +82,27 @@ run_part_1_3: $(TARGET)
 	./$(TARGET) -F > $(RES_DIR)/results_float.txt
 	./$(TARGET) -S > $(RES_DIR)/results_string.txt
 
-plot: $(RES_DIR)
-	python plotter.py
+$(VENV_DONE): requirements.txt
+	$(PYTHON) -m venv $(VENV_DIR)
+	@echo "Installing dependencies..."
+	$(VENV_PIP) install -r requirements.txt
+	@touch $(VENV_DONE)
+
+setup_venv: $(VENV_DONE)
+
+plot: $(VENV_DONE)
+	@mkdir -p $(PLOT_DIR)
+	@echo "--- Plotting ---"
+	$(VENV_PYTHON) plotter.py
+
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR) $(RES_DIR) $(PLOT_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR) $(RES_DIR) $(VENV_DIR)
 
 clean_obj:
 	rm -rf $(OBJ_DIR)
 
-.PHONY: all clean
+clean_plots:
+	rm -rf $(PLOT_DIR)
+
+.PHONY: all clean release debug part_1 part_2 part_3 run_part_1_3 plot clean_obj clean_plots setup_venv

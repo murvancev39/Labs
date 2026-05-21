@@ -19,6 +19,8 @@ unsigned hash_f_u_knuth (void *key)
 
 int unsigned_cmp (void *key1, void *key2)
 {
-    return *((unsigned *) key1) - *((unsigned *) key2);
+    if (*((unsigned *) key1) > *((unsigned *) key2)) return 1;
+    if (*((unsigned *) key1) == *((unsigned *) key2)) return 0;
+    return -1;
 }
 

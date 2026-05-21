@@ -2,7 +2,7 @@
 
 unsigned hash_f_s_len (void *key)
 {
-    return strlen ((char *) key);
+    return (unsigned) strlen ((char *) key);
 }
 
 unsigned hash_f_s_sum (void *key)
@@ -11,7 +11,7 @@ unsigned hash_f_s_sum (void *key)
     char *one_char = (char *) key;
     while (*one_char != '\0')
     {
-        sum += *one_char;
+        sum += (unsigned) *one_char;
         one_char++;
     }
     return sum;
@@ -23,7 +23,7 @@ unsigned hash_f_s_polinom (void *key)
     unsigned i = 0;
     unsigned cur_coef = 1;
     unsigned char x = 0;
-    while ((x = (((char *) key) [i])) != '\0')
+    while ((x = (unsigned char) (((unsigned char *) key) [i])) != '\0')
     {
         sum += x * cur_coef;
         cur_coef *= 31;
@@ -35,7 +35,7 @@ unsigned hash_f_s_polinom (void *key)
 unsigned hash_f_s_src32 (void *key)
 {   
     const unsigned char *string = (const unsigned char *) key;
-    unsigned len = strlen (key);
+    unsigned len = (unsigned) strlen (key);
     unsigned init = 0xFFFFFFFF;
     unsigned src = init;
     while (len--)

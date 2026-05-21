@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "err_def.h"
 
 unsigned hash_f_u_rem (void *key);
 unsigned hash_f_u_bits (void *key);

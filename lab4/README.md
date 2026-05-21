@@ -110,12 +110,22 @@
 ## Запуск
 
 ```bash
-make part_1        # Тесты для целых чисел (unsigned int)
-make part_2        # Тесты для дробных чисел (float)
-make part_3        # Тесты для строк (string)
-make run_part_1_3  # Запустить все тесты по очереди
-make plot          # Рисует графики
-make clean         # Удалить мусор (obj/ res/ plots/ bin/)
+# Сборки
+make release     # Релиз (-O3, -flto и тд)
+make debug       # Дебаг (Варнинги, санитайзеры и тд)
+
+# Тесты (генерация логов в res/)
+make part_1        # Unsigned int
+make part_2        # Float
+make part_3        # String
+make run_part_1_3  # Все тесты по очереди
+
+make plot          # Построить графики из res/
+
+make clean         # Удалить obj/, bin/, res/, venv/
+make clean_obj     # Удалить только .o файлы
+make clean_plots   # Удалить только /plots
+
 ```
 
 
