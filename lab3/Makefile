@@ -9,6 +9,13 @@ LOG_DIR = log
 PLT_DIR = plt
 
 
+PYTHON = python3
+VENV_DIR     = venv
+VENV_PIP     = $(VENV_DIR)/bin/pip
+VENV_PYTHON  = $(VENV_DIR)/bin/python3
+VENV_DONE    = $(VENV_DIR)/.venv_done
+
+
 TESTS = bin_insertion_testing bin_linear_testing\
 		binom_testing fib_testing\
 		dijkstra_bin_testing dijkstra_binom_testing dijkstra_fib_testing
@@ -87,11 +94,20 @@ $(LOG_DIR)/%.log: $(BIN_DIR)/%.exe
 
 run_logs: run_dense run_sparse run_simple
 
-plot: all
+
+$(VENV_DONE): requirements.txt
+	$(PYTHON) -m venv $(VENV_DIR)
+	@echo "Installing dependencies..."
+	$(VENV_PIP) install -r requirements.txt
+	@touch $(VENV_DONE)
+
+setup_venv: $(VENV_DONE)
+
+plot: $(VENV_DONE)
 	@mkdir -p $(PLT_DIR)
 	@echo "--- Plotting ---"
-	python3 plotter.py
+	$(VENV_PYTHON) plotter.py
 
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR) $(PLT_DIR) $(LOG_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR) $(PLT_DIR) $(LOG_DIR) $(VENV_DIR)
