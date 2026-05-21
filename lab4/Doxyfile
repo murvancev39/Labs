@@ -1,4 +1,4 @@
-PROJECT_NAME           = "Stack Project"
+PROJECT_NAME           = "Hash Project"
 OUTPUT_DIRECTORY       = doc
 INPUT                  = include src README.md
 RECURSIVE              = YES
