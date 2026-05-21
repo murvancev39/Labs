@@ -1,5 +1,53 @@
 #include "sparse_table.h"
 
+static unsigned get_log2 (unsigned len)
+{
+    if (len == 0) return 0;
+
+    unsigned logn = 0;
+    while ((unsigned) (1 << logn) <= len)
+    {
+        logn++;
+    }
+    return logn;
+}
+
+static void init_logs (char *lg_arr, unsigned len)
+{
+    if (!lg_arr) return;
+    lg_arr [0] = 0;
+    lg_arr [1] = 0;
+    for (unsigned i = 2; i <= len; i++)
+    {
+        lg_arr [i] = lg_arr [i / 2] + 1;
+    }
+}
+
+static int fill_table_n (sparse_t *table, unsigned *arr)
+{
+    unsigned **table_arr = (unsigned **) malloc (table->n * sizeof (unsigned *));
+    if (!table_arr) return 0;
+    table->table = table_arr;
+
+    for (unsigned i = 0; i < table->n; i++)
+    {
+        table_arr [i] = malloc (table->logn * sizeof (unsigned));
+        if (!(table_arr [i])) return (int) i;
+        table_arr [i][0] = arr [i];
+    }
+
+    for (unsigned char log = 1; (unsigned) log < table->logn; (unsigned) log++)
+    {
+        for (unsigned i = 0; i + (1 << (unsigned) log) <= table->n; i++)
+        {
+            unsigned left  = table_arr [i] [(unsigned) log - 1];
+            unsigned right = table_arr [i + (1 << ((unsigned) log - 1))] [(unsigned) log - 1];
+            table_arr [i] [(unsigned) log] = (left < right) ? left : right;
+        }
+    }
+    return -1;
+}
+
 void *create_v_n (unsigned *arr, unsigned len)
 {
     if (!arr || !len) return NULL;
@@ -8,48 +56,52 @@ void *create_v_n (unsigned *arr, unsigned len)
     if (!table) return NULL;
 
     table->n = len;
-    unsigned logn = 0;
-    while ( (unsigned) (1 << logn) <= len)
-    {
-        logn++;
-    }
+    unsigned logn = get_log2 (len);
     table->logn = logn;
 
     char *lg_arr = (char *) malloc ((len + 1) * sizeof (char));
-    table->lg_arr = lg_arr;
     if (!lg_arr) return free_in_create (table, 0);
-    lg_arr [0] = 0;
-    lg_arr [1] = 0;
-    for (unsigned i = 2; i <= len; i++)
-    {
-        lg_arr [i] = lg_arr [i / 2] + 1;
-    }
 
-    unsigned **table_arr = (unsigned **) malloc (table->n *sizeof (unsigned *));
-    if (!table_arr) return free_in_create (table, 0);
-    for (unsigned i = 0; i < table->n; i++)
-    {
-        table_arr [i] = malloc (logn * sizeof (unsigned));
-        if (!(table_arr [i])) return free_in_create (table, i);
-        table_arr [i][0] = arr [i];
-    }
-    table->table = table_arr;
+    table->lg_arr = lg_arr;
+    init_logs (lg_arr, len);
 
-    unsigned left_min = 0;
-    unsigned right_min = 0;
-
-    for (unsigned char log = 1; (unsigned) log < logn; (unsigned) log++)
-    {
-        for (unsigned i = 0; i + (1 << (unsigned) log) <= len; i++)
-        {
-            left_min  = table_arr [i] [(unsigned) log - 1];
-            right_min = table_arr [i + (1 << ((unsigned) log - 1))] [(unsigned) log - 1];
-
-            table_arr [i] [(unsigned) log] = min (left_min, right_min);
-        }
-    }
+    int res = fill_table_n (table, arr);
+    if (res != -1) return free_in_create (table, (unsigned) res);
 
     return table;
+}
+
+static int fill_table_logn (sparse_t *table, unsigned *arr)
+{
+    if (!table) return 0;
+
+    unsigned **table_arr = (unsigned **) malloc (table->logn * sizeof (unsigned *));
+    if (!table_arr) return 0;
+    
+    table->table = table_arr;
+
+    for (unsigned log = 0; log < table->logn; log++)
+    {
+        table_arr [log] = malloc (table->n * sizeof (unsigned));
+        if (!(table_arr [log])) return (int) log + 1;
+    }
+
+    for (unsigned i = 0; i < table->n; i++)
+    {
+        table_arr [0][i] = arr [i];
+    }
+
+    for (unsigned log = 1; log < table->logn; log++)
+    {
+        for (unsigned i = 0; i + (1 << log) <= table->n; i++)
+        {
+            unsigned left  = table_arr [log - 1] [i];
+            unsigned right = table_arr [log - 1] [i + (1 << (log - 1))];
+            table_arr [log] [i] = (left < right) ? left : right;
+        }
+    }
+    
+    return -1;
 }
 
 void *create_v_logn (unsigned *arr, unsigned len)
@@ -60,50 +112,16 @@ void *create_v_logn (unsigned *arr, unsigned len)
     if (!table) return NULL;
 
     table->n = len;
-    unsigned logn = 0;
-    while ((unsigned) (1 << logn) <= len)
-    {
-        logn++;
-    }
-    table->logn = logn;
+    table->logn = get_log2 (len);
 
     char *lg_arr = (char *) malloc ((len + 1) * sizeof (char));
-    table->lg_arr = lg_arr;
     if (!lg_arr) return free_in_create (table, 0);
-    lg_arr [0] = 0;
-    lg_arr [1] = 0;
-    for (unsigned i = 2; i <= len; i++)
-    {
-        lg_arr [i] = lg_arr [i / 2] + 1;
-    }
 
-    unsigned **table_arr = (unsigned **) malloc (table->logn *sizeof (unsigned *));
-    if (!table_arr) return free_in_create (table, 0);
-    for (unsigned i = 0; i < logn; i++)
-    {
-        table_arr [i] = malloc (len * sizeof (unsigned));
-        if (!(table_arr [i])) return free_in_create (table, i);
-    }
-    table->table = table_arr;
-    
-    // [i; i - 1 + 2^0] = [i; i]
-    for (unsigned i = 0; i < len; i++) table_arr [0][i] = arr [i];
-    unsigned left_min = 0;
-    unsigned right_min = 0;
+    table->lg_arr = lg_arr;
+    init_logs (lg_arr, len);
 
-    for (unsigned char log = 1; (unsigned) log < logn; (unsigned) log++)
-    {
-        for (unsigned i = 0; i + (1 << (unsigned) log) <= len; i++)
-        {
-            // [i; i - 1 + 2^((unsigned) log - 1)]
-            left_min  = table_arr [(unsigned) log - 1] [i];
-            // [i + 2^((unsigned) log - 1); i - 1 + 2*2^((unsigned) log - 1)]]
-            right_min = table_arr [(unsigned) log - 1] [i + (1 << ((unsigned) log - 1))];
-
-            // [i; i - 1 + 2^(unsigned) log]
-            table_arr [(unsigned) log] [i] = min (left_min, right_min);
-        }
-    }
+    int res = fill_table_logn (table, arr);
+    if (res != -1) return free_in_create (table, (unsigned) res);
 
     return table;
 }
@@ -155,8 +173,7 @@ sparse_t *free_in_create (sparse_t *table, unsigned error_string_idx)
 
 unsigned min (unsigned first, unsigned second)
 {
-    if (first > second) return second;
-    return first;
+    return (first > second) ? second : first;
 }
 
 void destruct_v_n (sparse_t *table)
