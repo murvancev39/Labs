@@ -1,5 +1,10 @@
 #include "hash_table_chained.h"
 
+/**
+ * @file hash_table_chained.c
+ * @brief Реализация функций хеш-таблицы методом цепочек.
+ */
+
 chained_hash_table_t *chained_hash_table_ctr (size_t size, float load_factor,
                                 unsigned (*hash_f) (void *), int (*cmp) (void *, void *))
 {

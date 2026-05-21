@@ -6,12 +6,40 @@
 #include <stdlib.h>
 #include "err_def.h"
 
+/**
+ * @file hash_f_part_3.h
+ * @brief Хеш-функции и компаратор для строк (null-terminated strings).
+ */
+
+/**
+ * @brief Хеширование по длине строки.
+ */
 unsigned hash_f_s_len (void *key);
+
+/**
+ * @brief Хеширование суммированием ASCII-кодов всех символов.
+ */
 unsigned hash_f_s_sum (void *key);
+
+/**
+ * @brief Полиномиальное хеширование (мультипликативный алгоритм с основанием 31).
+ */
 unsigned hash_f_s_polinom (void *key);
+
+/**
+ * @brief Хеширование с использованием алгоритма CRC32 (табличный метод).
+ */
 unsigned hash_f_s_src32 (void *key);
+
+/**
+ * @brief Лексикографический компаратор для строк.
+ * @return 0 при совпадении, >0 если key1 > key2, <0 если key1 < key2.
+ */
 int string_cmp (void *key1, void *key2);
 
+/**
+ * @brief Таблица констант для вычисления CRC32.
+ */
 static const unsigned int crc32_table [] =
 {
     0x00000000, 0x04c11db7, 0x09823b6e, 0x0d4326d9,
@@ -76,7 +104,7 @@ static const unsigned int crc32_table [] =
     0xf0a5bd1d, 0xf464a0aa, 0xf9278673, 0xfde69bc4,
     0x89b8fd09, 0x8d79e0be, 0x803ac667, 0x84fbdbd0,
     0x9abc8bd5, 0x9e7d9662, 0x933eb0bb, 0x97ffad0c,
-    0xafb010b1, 0xab710d06, 0xa6322bdf, 0xa2f33668,
+    0x4fb010b1, 0xab710d06, 0xa6322bdf, 0xa2f33668,
     0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4
 };
 

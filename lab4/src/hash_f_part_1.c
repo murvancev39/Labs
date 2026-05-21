@@ -1,3 +1,8 @@
+/**
+ * @file hash_f_part_1.c
+ * @brief Реализация хеш-функций и компаратора.
+ */
+
 #include "hash_f_part_1.h"
 
 unsigned hash_f_u_rem (void *key)

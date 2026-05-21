@@ -1,3 +1,8 @@
+/**
+ * @file hash_f_part_2.c
+ * @brief Реализация битовых хеш-функций и компаратора для float.
+ */
+
 #include "hash_f_part_2.h"
 
 unsigned hash_f_f_int (void *key)

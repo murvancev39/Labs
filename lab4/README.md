@@ -122,7 +122,7 @@ make run_part_1_3  # Все тесты по очереди
 
 make plot          # Построить графики из res/
 
-make clean         # Удалить obj/, bin/, res/, venv/
+make clean         # Удалить obj/, bin/, res/, venv/, doc/
 make clean_obj     # Удалить только .o файлы
 make clean_plots   # Удалить только /plots
 

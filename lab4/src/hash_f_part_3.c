@@ -1,3 +1,8 @@
+/**
+ * @file hash_f_part_3.c
+ * @brief Реализация алгоритмов хеширования строк и компаратора.
+ */
+
 #include "hash_f_part_3.h"
 
 unsigned hash_f_s_len (void *key)

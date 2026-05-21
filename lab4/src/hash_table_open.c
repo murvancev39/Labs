@@ -1,3 +1,8 @@
+/**
+ * @file hash_table_open.c
+ * @brief Реализация функций хеш-таблицы с открытой адресацией.
+ */
+
 #include "hash_table_open.h"
 #include <math.h>
 

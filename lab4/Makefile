@@ -21,6 +21,8 @@ SRC_DIR = src
 RES_DIR = res
 PLOT_DIR = plots
 TESTS_DIR = tests
+DOC_DIR = doc
+
 
 
 PYTHON = python3
@@ -95,9 +97,18 @@ plot: $(VENV_DONE)
 	@echo "--- Plotting ---"
 	$(VENV_PYTHON) plotter.py
 
+doc:
+	doxygen Doxyfile
+
+open_doc_on_wsl:	
+	@explorer.exe "$$(wslpath -w $(DOC_DIR)/html/index.html)"
+
+open_doc_on_win:
+	start "" "$(DOC_DIR)/html/index.html"
+
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR) $(RES_DIR) $(VENV_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR) $(RES_DIR) $(VENV_DIR) $(DOC_DIR)
 
 clean_obj:
 	rm -rf $(OBJ_DIR)

@@ -1,8 +1,13 @@
 #ifndef ERR_DEF_H
 #define ERR_DEF_H
 
-#define OK 0
-#define ERR 1
-#define ALLOC_ERR 2
+/**
+ * @file err_def.h
+ * @brief Коды ошибок проекта.
+ */
 
-#endif 
+#define OK 0        /**< Успешное выполнение. */
+#define ERR 1       /**< Общая ошибка. */
+#define ALLOC_ERR 2 /**< Ошибка выделения памяти. */
+
+#endif
