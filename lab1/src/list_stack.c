@@ -2,34 +2,35 @@
 
 void *list_stack_ctr (size_t element_size)
 {
-    struct list_stack *stack_ptr = (struct list_stack *) calloc (1, sizeof (struct list_stack));
+    list_stack_t *stack_ptr = (list_stack_t *) calloc (1, sizeof (list_stack_t));
+
     if (!stack_ptr) return NULL;
 
-    stack_ptr->employment = 0;
+    stack_ptr->count = 0;
     stack_ptr->head = NULL;
     stack_ptr->element_size = element_size;
 
     return stack_ptr;
 }
 
-int list_push (void *stack_ptr, void *buffer)
+status_t list_push (void *stack_ptr, void *buffer)
 {
-    if (!buffer) return 0;
-    if (!stack_ptr) return 0;
+    if (!buffer) return STATUS_ERR;
+    if (!stack_ptr) return STATUS_ERR;
     
-    struct list_stack *stack = stack_ptr;
+    list_stack_t *stack = stack_ptr;
 
-    struct node *new_node = (struct node *) calloc (1, sizeof (struct node));
+    node_t *new_node = (node_t *) calloc (1, sizeof (node_t));
     if (new_node == NULL)
     {
-        return 0;
+        return STATUS_ERR;
     }
 
     new_node->elem = (void *) calloc (1, stack->element_size);
     if (new_node->elem == NULL)
     {
         free (new_node);
-        return 0;
+        return STATUS_ERR;
     }
 
     memcpy (new_node->elem, buffer, stack->element_size);
@@ -38,54 +39,57 @@ int list_push (void *stack_ptr, void *buffer)
     new_node->next = next;
     stack->head = new_node;
 
-    stack->employment++;
+    stack->count++;
 
-    return 1;
+    return STATUS_OK;
 }
 
-int list_top (void *stack_ptr, void *buffer)
+status_t list_top (void *stack_ptr, void *buffer)
 {
-    if (!buffer) return 0;
-    if (!stack_ptr) return 0;
-    struct list_stack *stack = stack_ptr;
+    if (!buffer) return STATUS_ERR;
+    if (!stack_ptr) return STATUS_ERR;
 
-    if (stack->employment == 0)
+    list_stack_t *stack = stack_ptr;
+
+    if (stack->count == 0)
     {
-        return 0;
+        return STATUS_ERR;
     }
 
     memcpy (buffer, stack->head->elem, stack->element_size);
 
-    return 1;
+    return STATUS_OK;
 }
 
-int list_pop (void *stack_ptr)
+status_t list_pop (void *stack_ptr)
 {
-    if (!stack_ptr) return 0;
-    struct list_stack *stack = stack_ptr;
+    if (!stack_ptr) return STATUS_ERR;
 
-    if (stack->employment == 0)
+    list_stack_t *stack = stack_ptr;
+
+    if (stack->count == 0)
     {
-        return 0;
+        return STATUS_ERR;
     }
 
-    struct node *next = stack->head->next;
+    node_t *next = stack->head->next;
 
     free (stack->head->elem);
     free (stack->head);
 
     stack->head = next;
-    stack->employment--;
+    stack->count--;
 
-    return 1;
+    return STATUS_OK;
 }
 
 void *list_stack_dtr (void *stack_ptr)
 {
     assert (stack_ptr);
-    struct list_stack *stack = stack_ptr;
 
-    struct node *cur_node = stack->head;
+    list_stack_t *stack = stack_ptr;
+    node_t *cur_node = stack->head;
+    
     while (cur_node != NULL)
     {
         stack->head = stack->head->next;
@@ -97,8 +101,8 @@ void *list_stack_dtr (void *stack_ptr)
     return NULL;
 }
 
-int list_get_employment (void *stack_ptr)
+int list_get_count (void *stack_ptr)
 {
     if (!stack_ptr) return -1;
-    return ((int) (((struct list_stack *)stack_ptr)->employment));
+    return ((int) (((list_stack_t *)stack_ptr)->count));
 }

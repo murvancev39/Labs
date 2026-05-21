@@ -1,9 +1,13 @@
 .PHONY: all run plot clean doc
 
 TARGET = tester
+UNIT_TEST_TARGET = test
 
 CC = gcc
 CFLAGS = -O3 -Wall -Wextra -Iinclude
+
+TEST_CFLAGS = -g -O1 -Wall -Wextra -Iinclude -fsanitize=address -fsanitize=undefined
+
 
 SRC_DIR = src
 OBJ_DIR = obj
@@ -15,38 +19,46 @@ DOC_DIR = doc
 SOURCES = $(wildcard $(SRC_DIR)/*.c)
 OBJECT_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SOURCES))
 
-all: $(TARGET)
+ALL_C_FILES = $(wildcard $(SRC_DIR)/*.c)
+SOURCES = $(filter-out $(SRC_DIR)/tester.c $(SRC_DIR)/test.c, $(ALL_C_FILES))
 
-$(TARGET): $(OBJECT_FILES)
-	$(CC) $(OBJECT_FILES) -o $(TARGET)
+all: $(TARGET) $(UNIT_TEST_TARGET)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+unit_tests: $(UNIT_TEST_TARGET)
 
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+$(UNIT_TEST_TARGET): 
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(TEST_CFLAGS)  $(SOURCES) $(SRC_DIR)/$(UNIT_TEST_TARGET).c -o $(BIN_DIR)/$(UNIT_TEST_TARGET)
 
+$(TARGET):
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $(SOURCES) $(SRC_DIR)/$(TARGET).c -o $(BIN_DIR)/$(TARGET)
 
-run: $(TARGET)
+run_tester: $(TARGET)
 	mkdir -p $(RES_DIR)/arr $(RES_DIR)/list
-	(cd $(RES_DIR)/arr && ../../$(TARGET) -A)
-	(cd $(RES_DIR)/list && ../../$(TARGET) -L)
-	rm -f $(TARGET)
+	(cd $(RES_DIR)/arr && ../../$(BIN_DIR)/$(TARGET) -A)
+	(cd $(RES_DIR)/list && ../../$(BIN_DIR)/$(TARGET) -L)
+
+run_unit_tests: $(UNIT_TEST_TARGET)
+	./$(BIN_DIR)/$(UNIT_TEST_TARGET)
 
 plot:
-	python laba.py
-
+	python3 laba.py
 doc:
-	"doxygen" Doxyfile
+	doxygen Doxyfile
+
+open_doc_on_wsl:	
+	@explorer.exe "$$(wslpath -w $(DOC_DIR)/html/index.html)"
+
+open_doc_on_win:
 	start "" "$(DOC_DIR)/html/index.html"
 
 clean:
-	rm -rf $(OBJ_DIR) $(TARGET)
-	rm -rf $(RES_DIR)/*/*.txt
-	rm -rf $(RES_DIR)/*
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
 	rm -rf $(RES_DIR)
-	rm -rf $(PLT_DIR)/*.png
-	rm -rf $(PLT_DIR)
-	rm -rf $(DOC_DIR)/*/*
-	rm -rf $(DOC_DIR)/*
 	rm -rf $(DOC_DIR)
+
+clean_plots:
+	rm -rf $(PLT_DIR)
+
+.PHONY: all run plot clean doc unit_tests run_tester run_unit_tests open_doc_on_wsl open_doc_on_win $(UNIT_TEST_TARGET) $(TARGET)

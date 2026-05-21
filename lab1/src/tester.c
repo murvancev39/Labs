@@ -5,15 +5,16 @@
 #include "list_stack.h"
 #include <time.h>
 #include <assert.h>
+#include "status.h"
 
 typedef struct
 {
     void *(*stack_ctr) (size_t element_size);
     void *(*stack_dtr) (void *stack_ptr);
-    int (*push) (void *stack_ptr, void *buffer);
-    int (*top) (void *stack_ptr, void *buffer);
-    int (*pop) (void *stack_ptr);
-    int (*get_employment) (void *stack_ptr);
+    status_t (*push) (void *stack_ptr, void *buffer);
+    status_t (*top) (void *stack_ptr, void *buffer);
+    status_t (*pop) (void *stack_ptr);
+    int (*get_count) (void *stack_ptr);
 } stack_functions;
 
 
@@ -55,7 +56,7 @@ int main (int argc, char *argv[])
                                         arr_push,
                                         arr_top,
                                         arr_pop,
-                                        arr_get_employment
+                                        arr_get_count
                                     };
         
         double test_result = 0;
@@ -98,7 +99,7 @@ int main (int argc, char *argv[])
                                         list_push,
                                         list_top,
                                         list_pop,
-                                        list_get_employment
+                                        list_get_count
                                     };
         
         double test_result = 0;
@@ -144,10 +145,10 @@ double test_1 (int num_elements, stack_functions *interface)
             interface->push (stack_ptr, &i);
         }
 
-        while (interface->get_employment (stack_ptr) >= num_elements / 10)
+        while (interface->get_count (stack_ptr) >= num_elements / 10)
         {
-            int half = interface->get_employment (stack_ptr) / 2;
-            int quarter = interface->get_employment (stack_ptr) / 4;
+            int half = interface->get_count (stack_ptr) / 2;
+            int quarter = interface->get_count (stack_ptr) / 4;
             for (int i = 0; i < half; i++)
             {
                 interface->pop (stack_ptr);
