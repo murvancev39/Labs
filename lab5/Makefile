@@ -37,6 +37,7 @@ BIN_DIR = bin
 SRC_DIR = src
 RES_DIR = res
 PLOT_DIR = plots
+DOC_DIR = doc
 
 AVL_NAME      = AVL
 B_NAME        = B
@@ -123,8 +124,18 @@ $(VENV)/bin/activate:
 	@$(BIN)/pip install matplotlib numpy
 	@touch $(VENV)/bin/activate
 
+doc:
+	doxygen Doxyfile
+
+open_doc_on_wsl:	
+	@explorer.exe "$$(wslpath -w $(DOC_DIR)/html/index.html)"
+
+open_doc_on_win:
+	start "" "$(DOC_DIR)/html/index.html"
+
+
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR) $(RES_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR) $(RES_DIR) $(DOC_DIR)
 
 clean_plots:
 	rm -rf $(PLOT_DIR)

@@ -1,0 +1,11 @@
+PROJECT_NAME           = "Forest Project"
+OUTPUT_DIRECTORY       = doc
+INPUT                  = include src README.md
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+
+
+HTML_TIMESTAMP         = NO
+SEARCHENGINE           = NO

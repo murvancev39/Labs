@@ -1,42 +1,42 @@
-#include <BST_tree.h>
+#include <bst_tree.h>
 
-static void BST_destroy_nodes (BST_node_t *node)
+static void bst_destroy_nodes (bst_node_t *node)
 {
     if (!node) return;
-    BST_destroy_nodes (node->left_node);
-    BST_destroy_nodes (node->right_node);
+    bst_destroy_nodes (node->left_node);
+    bst_destroy_nodes (node->right_node);
     free (node);
 }
 
-void BST_destructor (void *tree_v)
+void bst_destructor (void *tree_v)
 {
-    BST_tree_t *tree = tree_v;
+    bst_tree_t *tree = tree_v;
     if (!tree) return;
     if (tree->root) 
     {
-        BST_destroy_nodes (tree->root);
+        bst_destroy_nodes (tree->root);
     }
     free (tree);
 }
 
-int BST_add (void *tree_v, unsigned key)
+int bst_add (void *tree_v, unsigned key)
 {
-    BST_tree_t *tree = tree_v;
-    if (!tree) return 1;
+    bst_tree_t *tree = tree_v;
+    if (!tree) return ERROR;
 
-    BST_node_t *node = tree->root;
-    BST_node_t *parent = NULL;
+    bst_node_t *node = tree->root;
+    bst_node_t *parent = NULL;
 
     while (node != NULL)
     {
         parent = node;
-        if (node->key == key) return 0;
+        if (node->key == key) return OK;
         
         node = (node->key > key) ? node->left_node : node->right_node;
     }
 
-    BST_node_t *new_node = (BST_node_t *) calloc (1, sizeof (BST_node_t));
-    if (!new_node) return 1;
+    bst_node_t *new_node = (bst_node_t *) calloc (1, sizeof (bst_node_t));
+    if (!new_node) return ERROR;
 
     new_node->key = key;
     new_node->parent = parent;
@@ -55,14 +55,14 @@ int BST_add (void *tree_v, unsigned key)
     }
 
     tree->count++;
-    return 0;
+    return OK;
 }
 
-BST_node_t *BST_find (BST_tree_t *tree, unsigned key)
+bst_node_t *bst_find (bst_tree_t *tree, unsigned key)
 {
     if (!tree || !tree->root) return NULL;
 
-    BST_node_t *node = tree->root;
+    bst_node_t *node = tree->root;
 
     while (node != NULL)
     {
@@ -84,9 +84,9 @@ BST_node_t *BST_find (BST_tree_t *tree, unsigned key)
     return NULL;
 }
 
-void *BST_init ()
+void *bst_init ()
 {
-    BST_tree_t *tree = (BST_tree_t *) calloc (1, sizeof (BST_tree_t));
+    bst_tree_t *tree = (bst_tree_t *) calloc (1, sizeof (bst_tree_t));
     if (!tree) return NULL;
     
     tree->root = NULL;
@@ -94,11 +94,11 @@ void *BST_init ()
     return tree;
 }
 
-void BST_replace_node (BST_node_t **tree, BST_node_t *first, BST_node_t *second)
+void bst_replace_node (bst_node_t **root_ptr, bst_node_t *first, bst_node_t *second)
 {
     if (first->parent == NULL)
     {
-        *tree = second;
+        *root_ptr = second;
     }
     else if (first == first->parent->left_node)
     {
@@ -115,49 +115,46 @@ void BST_replace_node (BST_node_t **tree, BST_node_t *first, BST_node_t *second)
     }
 }
 
-int BST_delete (void *tree_v, unsigned key)
+int bst_delete (void *tree_v, unsigned key)
 {
-    BST_tree_t *tree = tree_v;
-    if (!tree || !tree->root) return 0;
+    bst_tree_t *tree = tree_v;
+    if (!tree || !tree->root) return ERROR;
 
-    BST_node_t *node = tree->root;
-
+    bst_node_t *node = tree->root;
     while (node != NULL && node->key != key)
     {
         node = (key < node->key) ? node->left_node : node->right_node;
     }
 
-    if (node == NULL) return 0;
+    if (node == NULL) return OK;
 
     if (node->left_node == NULL)
     {
-        BST_replace_node (&tree->root, node, node->right_node);
+        bst_replace_node (&tree->root, node, node->right_node);
     }
     else if (node->right_node == NULL)
     {
-        BST_replace_node (&tree->root, node, node->left_node);
+        bst_replace_node (&tree->root, node, node->left_node);
     }
     else
     {
-        BST_node_t *el_priemnik = node->right_node;
+        bst_node_t *el_priemnik = node->right_node;
         while (el_priemnik->left_node != NULL)
-        {
             el_priemnik = el_priemnik->left_node;
-        }
 
         if (el_priemnik->parent != node)
         {
-            BST_replace_node (&tree->root, el_priemnik, el_priemnik->right_node);
+            bst_replace_node (&tree->root, el_priemnik, el_priemnik->right_node);
             el_priemnik->right_node = node->right_node;
             el_priemnik->right_node->parent = el_priemnik;
         }
 
-        BST_replace_node (&tree->root, node, el_priemnik);
+        bst_replace_node (&tree->root, node, el_priemnik);
         el_priemnik->left_node = node->left_node;
         el_priemnik->left_node->parent = el_priemnik;
     }
 
     free (node);
     tree->count--;
-    return 0;
+    return OK;
 }

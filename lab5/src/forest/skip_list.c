@@ -1,8 +1,8 @@
-#include "SKIP_list.h"
+#include "skip_list.h"
 
-SKIP_node_t *SKIP_ctr_node (unsigned key, SKIP_node_t *down, SKIP_node_t *next)
+skip_node_t *skip_ctr_node (unsigned key, skip_node_t *down, skip_node_t *next)
 {
-    SKIP_node_t *node = (SKIP_node_t *) malloc (1 * sizeof (SKIP_node_t));
+    skip_node_t *node = (skip_node_t *) malloc (sizeof (skip_node_t));
     if (!node) return NULL;
     node->down = down;
     node->next = next;
@@ -10,17 +10,17 @@ SKIP_node_t *SKIP_ctr_node (unsigned key, SKIP_node_t *down, SKIP_node_t *next)
     return node;
 }
 
-SKIP_node_t *SKIP_search (SKIP_node_t *top, unsigned key)
+skip_node_t *skip_search (skip_node_t *top, unsigned key)
 {
     if (!top) return NULL;
-    SKIP_node_t *node = top;
+    skip_node_t *node = top;
 
     while (node->next && (node->next->key < key))
     {
         node = node->next;
     }
 
-    if (node->down) return SKIP_search (node->down, key);
+    if (node->down) return skip_search (node->down, key);
     
     if (node->next && node->next->key == key) 
     {
@@ -30,21 +30,27 @@ SKIP_node_t *SKIP_search (SKIP_node_t *top, unsigned key)
     return node; 
 }
 
-int SKIP_add (void *list_v, unsigned key)
+int skip_add (void *list_v, unsigned key)
 {
-    SKIP_list_t *list = list_v;
-    if (!list) return 1;
+    skip_list_t *list = list_v;
+    if (!list) return ERROR;
 
-    unsigned rand_height = SKIP_get_rand_height ();
+    unsigned rand_height = skip_get_rand_height ();
     
-    while (list->max_height < rand_height) SKIP_re_max_height (list);
-    if (list->height < rand_height) SKIP_re_height (list, rand_height);
+    while (list->max_height < rand_height) 
+    {
+        if (skip_re_max_height (list) != OK) return ERROR;
+    }
+    if (list->height < rand_height) 
+    {
+        if (skip_re_height (list, rand_height) != OK) return ERROR;
+    }
 
-    SKIP_node_t **insert_arr = (SKIP_node_t **) malloc (rand_height * sizeof (SKIP_node_t *));
-    if (!insert_arr) return 1;
+    skip_node_t **insert_arr = (skip_node_t **) malloc (rand_height * sizeof (skip_node_t *));
+    if (!insert_arr) return ERROR;
 
     int list_idx = (int) list->height - 1;
-    SKIP_node_t *node = list->lists_arr [list_idx];
+    skip_node_t *node = list->lists_arr [list_idx];
 
     while (list_idx >= 0)
     {
@@ -65,40 +71,39 @@ int SKIP_add (void *list_v, unsigned key)
         list_idx--;
     }
 
-    SKIP_node_t *down_ptr = NULL;
+    skip_node_t *down_ptr = NULL;
     for (unsigned i = 0; i < rand_height; i++)
     {
-        SKIP_node_t *new_node = SKIP_ctr_node (key, down_ptr, NULL);
+        skip_node_t *new_node = skip_ctr_node (key, down_ptr, NULL);
         if (!new_node)
         {
             free (insert_arr);
-            return -1;
+            return ERROR;
         }
 
-        SKIP_insert_node (insert_arr [i], new_node);
+        skip_insert_node (insert_arr [i], new_node);
         
         down_ptr = new_node;
     }
 
     free (insert_arr);
-    return 0;
+    return OK;
 }
 
-int SKIP_insert_node (SKIP_node_t *after_that, SKIP_node_t *this)
+int skip_insert_node (skip_node_t *after_that, skip_node_t *this)
 {
-    if (!after_that) return 1;
-    if (!this) return 1;
+    if (!after_that || !this) return ERROR;
 
-    SKIP_node_t *swap = after_that->next;
+    skip_node_t *swap = after_that->next;
     after_that->next = this;
     this->next = swap;
-    return 0;
+    return OK;
 }
 
-SKIP_node_t *SKIP_ctr_list () 
+skip_node_t *skip_ctr_list () 
 {
-    SKIP_node_t *head = (SKIP_node_t *) calloc (1, sizeof (SKIP_node_t));
-    SKIP_node_t *tail = (SKIP_node_t *) calloc (1, sizeof (SKIP_node_t));
+    skip_node_t *head = (skip_node_t *) calloc (1, sizeof (skip_node_t));
+    skip_node_t *tail = (skip_node_t *) calloc (1, sizeof (skip_node_t));
     
     if (!head || !tail) 
     {
@@ -114,14 +119,14 @@ SKIP_node_t *SKIP_ctr_list ()
     return head;
 }
 
-int SKIP_re_height (SKIP_list_t *list, unsigned new_height)
+int skip_re_height (skip_list_t *list, unsigned new_height)
 {
-    if (!list) return 1;
+    if (!list) return ERROR;
 
     for (unsigned hg = list->height; hg < new_height; hg++)
     {
-        SKIP_node_t *new_head = SKIP_ctr_list ();
-        if (!new_head) return -1;
+        skip_node_t *new_head = skip_ctr_list ();
+        if (!new_head) return ERROR;
 
         if (hg > 0) 
         {
@@ -132,34 +137,34 @@ int SKIP_re_height (SKIP_list_t *list, unsigned new_height)
     }
     
     list->height = new_height;
-    return 0;
+    return OK;
 }
 
-int SKIP_re_max_height (SKIP_list_t *list)
+int skip_re_max_height (skip_list_t *list)
 {
-    if (!list) return 1;
+    if (!list) return ERROR;
 
     unsigned old_max = list->max_height;
-    list->max_height *= 2;
+    unsigned new_max = list->max_height * 2;
 
-    SKIP_node_t **new_lists_arr = (SKIP_node_t **) realloc (list->lists_arr, list->max_height * sizeof (SKIP_node_t *));
+    skip_node_t **new_lists_arr = (skip_node_t **) realloc (list->lists_arr, new_max * sizeof (skip_node_t *));
     
     if (!new_lists_arr)
     {
-        list->max_height = old_max;
-        return 2;
+        return ERROR;
     }
 
-    for (unsigned i = old_max; i < list->max_height; i++)
+    for (unsigned i = old_max; i < new_max; i++)
     {
         new_lists_arr [i] = NULL;
     }
 
     list->lists_arr = new_lists_arr;
-    return 0;
+    list->max_height = new_max;
+    return OK;
 }
 
-unsigned SKIP_get_rand_height ()
+unsigned skip_get_rand_height ()
 {
     unsigned height = 1;
     while (rand () % 2)
@@ -169,12 +174,12 @@ unsigned SKIP_get_rand_height ()
     return height;
 }
 
-int SKIP_delete (void *list_v, unsigned key)
+int skip_delete (void *list_v, unsigned key)
 {
-    SKIP_list_t *list = list_v;
-    if (!list || list->height == 0) return 1;
+    skip_list_t *list = list_v;
+    if (!list || list->height == 0) return ERROR;
 
-    SKIP_node_t *node = list->lists_arr [list->height - 1];
+    skip_node_t *node = list->lists_arr [list->height - 1];
 
     for (int hg = (int) list->height - 1; hg >= 0; hg--)
     {
@@ -185,7 +190,7 @@ int SKIP_delete (void *list_v, unsigned key)
 
         if (node->next && node->next->key == key)
         {
-            SKIP_node_t *target = node->next;
+            skip_node_t *target = node->next;
             node->next = target->next;
             free (target);
         }
@@ -196,20 +201,20 @@ int SKIP_delete (void *list_v, unsigned key)
         }
     }
 
-    return 0;
+    return OK;
 }
 
-void SKIP_destructor (void *list_v)
+void skip_destructor (void *list_v)
 {
-    SKIP_list_t *list = list_v;
+    skip_list_t *list = list_v;
     if (!list) return;
 
     for (unsigned hg = 0; hg < list->height; hg++)
     {
-        SKIP_node_t *current = list->lists_arr [hg];
+        skip_node_t *current = list->lists_arr [hg];
         while (current)
         {
-            SKIP_node_t *next_to_free = current->next;
+            skip_node_t *next_to_free = current->next;
             free (current);
             current = next_to_free;
         }
@@ -217,26 +222,24 @@ void SKIP_destructor (void *list_v)
 
     free (list->lists_arr);
     free (list);
-    return;
 }
 
-
-void *SKIP_init ()
+void *skip_init ()
 {
-    SKIP_list_t *list = (SKIP_list_t *) calloc (1, sizeof (SKIP_list_t));
+    skip_list_t *list = (skip_list_t *) calloc (1, sizeof (skip_list_t));
     if (!list) return NULL;
 
     list->max_height = 4;
     list->height = 0;
     
-    list->lists_arr = (SKIP_node_t **) calloc (list->max_height, sizeof (SKIP_node_t *));
+    list->lists_arr = (skip_node_t **) calloc (list->max_height, sizeof (skip_node_t *));
     if (!list->lists_arr)
     {
         free (list);
         return NULL;
     }
 
-    if (SKIP_re_height (list, 1) != 0)
+    if (skip_re_height (list, 1) != OK)
     {
         free (list->lists_arr);
         free (list);

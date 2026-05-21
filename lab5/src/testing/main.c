@@ -7,14 +7,14 @@ int main (int argc, char *argv [])
 
     interface_t *interface = NULL;
 
-    if (!strcmp (argv [1], "--B"))        interface = B_interface    (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
-    if (!strcmp (argv [1], "--RB"))       interface = RB_interface   (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
-    if (!strcmp (argv [1], "--AVL"))      interface = AVL_interface  (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
-    if (!strcmp (argv [1], "--CRT"))      interface = CRT_interface  (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
-    if (!strcmp (argv [1], "--SPL"))      interface = SPL_interface  (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);
-    if (!strcmp (argv [1], "--SKIP"))     interface = SKIP_interface (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
-    if (!strcmp (argv [1], "--BST_RAND")) interface = BST_interface  (BST_RAND_ALL, BST_RAND_ALL, BST_RAND_ALL, argv [2]); 
-    if (!strcmp (argv [1], "--BST_SORT")) interface = BST_interface  (BST_SORTED_ALL, BST_SORTED_ALL, BST_SORTED_ALL, argv [2]); 
+    if (!strcmp (argv [1], "--B"))        interface = b_interface    (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
+    if (!strcmp (argv [1], "--RB"))       interface = rb_interface   (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
+    if (!strcmp (argv [1], "--AVL"))      interface = avl_interface  (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
+    if (!strcmp (argv [1], "--CRT"))      interface = crt_interface  (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
+    if (!strcmp (argv [1], "--SPL"))      interface = spl_interface  (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);
+    if (!strcmp (argv [1], "--SKIP"))     interface = skip_interface (BIG_FROM, BIG_TO, BIG_STEP, argv [2]);    
+    if (!strcmp (argv [1], "--BST_RAND")) interface = bst_interface  (BST_RAND_ALL,   BST_RAND_ALL,   BST_RAND_ALL, argv [2]); 
+    if (!strcmp (argv [1], "--BST_SORT")) interface = bst_interface  (BST_SORTED_ALL, BST_SORTED_ALL, BST_SORTED_ALL, argv [2]); 
 
     error_code_t error_code = all_okey;
 
@@ -24,7 +24,7 @@ int main (int argc, char *argv [])
     
     free (interface);
 
-#ifndef NDEBUG
+#ifndef NDEbUG
     if (error_code) error_code_handling (error_code);
 #endif
 
@@ -81,7 +81,7 @@ void error_code_handling (error_code_t error_code)
 
     case func_name_init_error:
         fprintf (stderr, "Message: Failed to identify the function name.\n"
-                        "Possible reason: The string with the tree name (e.g., 'AVL') is empty or NULL.\n");
+                        "Possible reason: The string with the tree name (e.g., 'avl') is empty or NULL.\n");
         break;
 
     case snprintf_overflow_error:
@@ -110,15 +110,15 @@ void error_code_handling (error_code_t error_code)
 }
 
 
-interface_t *AVL_interface (unsigned from, unsigned to, unsigned step, char path [])
+interface_t *avl_interface (unsigned from, unsigned to, unsigned step, char path [])
 {
     interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
     if (!interface) return NULL;
 
-    interface->add_f      = AVL_add;
-    interface->init_f     = AVL_init;
-    interface->delete_f   = AVL_delete;
-    interface->destruct_f = AVL_destructor;
+    interface->add_f      = avl_add;
+    interface->init_f     = avl_init;
+    interface->delete_f   = avl_delete;
+    interface->destruct_f = avl_destructor;
     interface->test_gen_f = rand_unsigned_arr;
     interface->from       = from;
     interface->to         = to;
@@ -130,15 +130,15 @@ interface_t *AVL_interface (unsigned from, unsigned to, unsigned step, char path
 
 
 
-interface_t *B_interface (unsigned from, unsigned to, unsigned step, char path [])
+interface_t *b_interface (unsigned from, unsigned to, unsigned step, char path [])
 {
     interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
     if (!interface) return NULL;
 
-    interface->add_f      = B_add;
-    interface->init_f     = B_init;
-    interface->delete_f   = B_delete;
-    interface->destruct_f = B_free_tree;
+    interface->add_f      = b_add;
+    interface->init_f     = b_init;
+    interface->delete_f   = b_delete;
+    interface->destruct_f = b_free_tree;
     interface->test_gen_f = rand_unsigned_arr;
     interface->from       = from;
     interface->to         = to;
@@ -150,15 +150,15 @@ interface_t *B_interface (unsigned from, unsigned to, unsigned step, char path [
 
 
 
-interface_t *BST_interface (unsigned from, unsigned to, unsigned step, char path [])
+interface_t *bst_interface (unsigned from, unsigned to, unsigned step, char path [])
 {
     interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
     if (!interface) return NULL;
 
-    interface->add_f      = BST_add;
-    interface->init_f     = BST_init;
-    interface->delete_f   = BST_delete;
-    interface->destruct_f = BST_destructor;
+    interface->add_f      = bst_add;
+    interface->init_f     = bst_init;
+    interface->delete_f   = bst_delete;
+    interface->destruct_f = bst_destructor;
     interface->test_gen_f = rand_unsigned_arr;
     interface->from       = from;
     interface->to         = to;
@@ -168,34 +168,15 @@ interface_t *BST_interface (unsigned from, unsigned to, unsigned step, char path
     return interface;
 }
 
-interface_t *CRT_interface (unsigned from, unsigned to, unsigned step, char path [])
+interface_t *crt_interface (unsigned from, unsigned to, unsigned step, char path [])
 {
     interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
     if (!interface) return NULL;
 
-    interface->add_f      = CRT_add;
-    interface->init_f     = CRT_init;
-    interface->delete_f   = CRT_delete;
-    interface->destruct_f = CRT_destroy_tree;
-    interface->test_gen_f = rand_unsigned_arr;
-    interface->from       = from;
-    interface->to         = to;
-    interface->step       = step;
-    strncpy (interface->_path, path, INIT_PATH_LEN - 1);
-    interface->_path [INIT_PATH_LEN - 1] = '\0';
-    return interface;
-}
-
-
-interface_t *RB_interface (unsigned from, unsigned to, unsigned step, char path [])
-{
-    interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
-    if (!interface) return NULL;
-
-    interface->add_f      = RB_add;
-    interface->init_f     = RB_init;
-    interface->delete_f   = RB_delete;
-    interface->destruct_f = RB_destroy_tree;
+    interface->add_f      = crt_add;
+    interface->init_f     = crt_init;
+    interface->delete_f   = crt_delete;
+    interface->destruct_f = crt_destroy_tree;
     interface->test_gen_f = rand_unsigned_arr;
     interface->from       = from;
     interface->to         = to;
@@ -206,15 +187,15 @@ interface_t *RB_interface (unsigned from, unsigned to, unsigned step, char path 
 }
 
 
-interface_t *SKIP_interface (unsigned from, unsigned to, unsigned step, char path [])
+interface_t *rb_interface (unsigned from, unsigned to, unsigned step, char path [])
 {
     interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
     if (!interface) return NULL;
 
-    interface->add_f      = SKIP_add;
-    interface->init_f     = SKIP_init;
-    interface->delete_f   = SKIP_delete;
-    interface->destruct_f = SKIP_destructor;
+    interface->add_f      = rb_add;
+    interface->init_f     = rb_init;
+    interface->delete_f   = rb_delete;
+    interface->destruct_f = rb_destroy_tree;
     interface->test_gen_f = rand_unsigned_arr;
     interface->from       = from;
     interface->to         = to;
@@ -225,15 +206,34 @@ interface_t *SKIP_interface (unsigned from, unsigned to, unsigned step, char pat
 }
 
 
-interface_t *SPL_interface (unsigned from, unsigned to, unsigned step, char path [])
+interface_t *skip_interface (unsigned from, unsigned to, unsigned step, char path [])
 {
     interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
     if (!interface) return NULL;
 
-    interface->add_f      = SPL_add;
-    interface->delete_f   = SPL_delete;
-    interface->init_f     = SPL_ctr_tree;
-    interface->destruct_f = SPL_destructor;
+    interface->add_f      = skip_add;
+    interface->init_f     = skip_init;
+    interface->delete_f   = skip_delete;
+    interface->destruct_f = skip_destructor;
+    interface->test_gen_f = rand_unsigned_arr;
+    interface->from       = from;
+    interface->to         = to;
+    interface->step       = step;
+    strncpy (interface->_path, path, INIT_PATH_LEN - 1);
+    interface->_path [INIT_PATH_LEN - 1] = '\0';
+    return interface;
+}
+
+
+interface_t *spl_interface (unsigned from, unsigned to, unsigned step, char path [])
+{
+    interface_t *interface = (interface_t *) malloc (1 * sizeof (interface_t));
+    if (!interface) return NULL;
+
+    interface->add_f      = spl_add;
+    interface->delete_f   = spl_delete;
+    interface->init_f     = spl_ctr_tree;
+    interface->destruct_f = spl_destructor;
     interface->test_gen_f = rand_unsigned_arr;
     interface->from       = from;
     interface->to         = to;
