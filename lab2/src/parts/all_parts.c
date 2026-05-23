@@ -87,7 +87,7 @@ int run_part_1 (char res_dir_path [], char tests_dir_path [])
                                 interface [i].path_tests_to,
                                 interface [i].test_size,
                                 interface [i].test_step);
-        if (indicator) return 1; //TODO проверка в мейке
+        if (indicator) return 1;
         printf ("[SMALL TESTS] - COMPLETED : %s sort\n", interface [i].func_name);
     }
     

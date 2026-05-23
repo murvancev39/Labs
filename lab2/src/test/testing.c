@@ -33,7 +33,6 @@ double *test_sort_func (const char *test_dir, sort_func_ptr_t sort_func, unsigne
         {
             sprintf (cur_path, "%s%u_%d.in", test_dir, cur_size, i);
 
-            // printf ("\n\nEBKAN : %s\n\n", cur_path);
             test_file_in = fopen (cur_path, "r");
             if (!test_file_in) 
             {
