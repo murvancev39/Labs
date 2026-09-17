@@ -1,0 +1,137 @@
+/**
+ * @file tester.h
+ * @brief Библиотека для тестирования производительности структур данных (деревьев).
+ * 
+ * Предоставляет инструменты для автоматического измерения времени добавления 
+ * и удаления элементов из структуры данных с заданной частотой шага.
+ */
+
+#ifndef TESTER_H
+#define TESTER_H
+
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include "status_def.h"
+
+// ANSI цвета для вывода ошибок
+#define ANSI_COLOR_RESET    "\x1b[0m"
+#define ANSI_COLOR_RED      "\x1b[31m"
+#define ANSI_COLOR_GREEN    "\x1b[32m"
+#define ANSI_COLOR_YELLOW   "\x1b[33m"
+#define ANSI_COLOR_BLUE     "\x1b[34m"
+
+#ifndef NDEBUG
+#define ERR_PRINTF(fmt, ...) fprintf(stderr, ANSI_COLOR_YELLOW "[ERROR] %s:%d in %s: " fmt ANSI_COLOR_RESET "\n", \
+                                    __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#else
+#define ERR_PRINTF(fmt, ...) do {} while (0)
+#endif
+
+#define ITER_COUNT 5
+
+// Функциональные типы для интерфейса тестируемой структуры
+typedef unsigned *(*test_gen_func_t) (unsigned);
+typedef int        (*add_func_t)     (void *, unsigned);
+typedef int        (*delete_func_t)   (void *, unsigned);
+typedef void      *(*init_func_t)     ();
+typedef void       (*destruct_func_t) (void *);
+
+#define INIT_PATH_LEN 128
+#define MAX_PATH_LEN  160
+
+/**
+ * @brief Коды ошибок, возвращаемые библиотекой.
+ */
+typedef enum Error_code_t
+{
+    all_okey = 0,
+    alloc_error = 1,
+    fopen_error = 2,
+    output_error = 3,
+    func_ptr_error = 4,
+    test_gen_error = 5,
+    make_path_error = 6,
+    path_intit_error = 7,
+    null_argument_error = 8,
+    func_name_init_error = 9,
+    snprintf_overflow_error = 10,
+    path_length_exceeded_error = 11,
+    incorrect_number_args_error = 12
+} error_code_t;
+
+/**
+ * @brief Структура интерфейса для передачи функций управления структурой данных в тестер.
+ */
+typedef struct Interface_t
+{
+    add_func_t      add_f;      ///< Функция добавления элемента
+    init_func_t     init_f;     ///< Функция инициализации структуры
+    delete_func_t   delete_f;   ///< Функция удаления элемента
+    destruct_func_t destruct_f; ///< Функция уничтожения структуры
+    test_gen_func_t test_gen_f; ///< Генератор тестовых данных
+    char _path [INIT_PATH_LEN]; ///< Базовый путь для сохранения результатов
+    unsigned from, to, step;    ///< Диапазон размеров (от, до, шаг)
+} interface_t;
+
+/**
+ * @brief Структура хранения результатов тестирования.
+ */
+typedef struct Result_t
+{
+    unsigned size;          ///< Количество точек измерения
+    double *add_time;       ///< Массив среднего времени добавления
+    double *delete_time;    ///< Массив среднего времени удаления
+    error_code_t error_code;///< Код ошибки, возникшей в процессе
+} result_t;
+
+/**
+ * @brief Основная точка входа для запуска процесса тестирования.
+ * @param interface Настроенный интерфейс тестирования.
+ * @return Код ошибки типа error_code_t.
+ */
+error_code_t run (interface_t interface);
+
+/**
+ * @brief Внутренняя функция проведения замеров времени.
+ */
+void testing (interface_t interface, result_t *result);
+
+/**
+ * @brief Записывает результаты из структуры result_t в файлы.
+ */
+void write_result (interface_t interface, result_t result []);
+
+/**
+ * @brief Создает путь к файлу результата.
+ */
+char *make_path (char *path, char *file_name, result_t *result);
+
+/**
+ * @brief Выводит массив double в файл.
+ */
+error_code_t output_double_arr (FILE *output_file, double *arr, unsigned size);
+
+/**
+ * @brief Вспомогательная функция для очистки ресурсов при записи.
+ */
+void free_fclose_for_write_result (FILE *first_file, FILE *second_file, char *path_1, char *path_2);
+
+/**
+ * @brief Заполняет структуру элементами из массива и измеряет время.
+ */
+clock_t feel_tree_by_arr (unsigned size, unsigned *test_arr, void *tree, result_t *result, add_func_t add_f);
+
+/**
+ * @brief Удаляет элементы из структуры согласно массиву и измеряет время.
+ */
+clock_t delete_from_tree_by_arr (unsigned size, unsigned *test_arr, void *tree, result_t *result, delete_func_t delete_f);
+
+/**
+ * @brief Очищает память, выделенную внутри функции testing.
+ */
+void free_in_testing (double *add_time_arr, double *delete_time_arr, unsigned *test_arr, void *tree_ptr, destruct_func_t destruct_f);
+
+#endif
