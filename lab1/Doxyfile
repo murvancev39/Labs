@@ -1,0 +1,11 @@
+PROJECT_NAME           = "Stack Project"
+OUTPUT_DIRECTORY       = doc
+INPUT                  = include src README.md
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+
+# Чтобы не плодить лишние файлы внутри html/
+HTML_TIMESTAMP         = NO
+SEARCHENGINE           = NO
